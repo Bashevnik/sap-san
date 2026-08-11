@@ -51,7 +51,33 @@ tools/optimize.js   перегенерація WebP з оригіналів
 
 ---
 
+## Гілки
+
+- **main** — прод. Тут працює дизайн і верстка.
+- **dev** — інтеграція з Telegram-ботом (адмінка).
+
+Обидві гілки хостяться:
+
+| Гілка | Адреса |
+|---|---|
+| main | https://bashevnik.github.io/sap-san/ |
+| dev  | https://bashevnik.github.io/sap-san/dev/ |
+
+---
+
 ## Підключення бекенду й Telegram-бота
+
+**Повний контракт API — у [API.md](API.md).**
+**Промпт для розробника бота — у [BOT_PROMPT.md](BOT_PROMPT.md).**
+
+Єдиний файл, який редагує бекендер, — `js/config.js`:
+
+```js
+window.SAPSAN_CONFIG = { apiBase: 'https://бекенд.vercel.app/api' };
+```
+
+Порожній `apiBase` = сайт працює на вбудованому контенті.
+
 
 ### 1. Контент — `js/data.js`
 
