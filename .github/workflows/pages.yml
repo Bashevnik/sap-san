@@ -1,0 +1,68 @@
+name: Deploy to GitHub Pages
+
+# Хостимо ДВІ гілки одночасно:
+#   main → https://<user>.github.io/sap-san/
+#   dev  → https://<user>.github.io/sap-san/dev/
+# Робочу гілку бота можна дивитися онлайн, не чіпаючи прод.
+
+on:
+  push:
+    branches: [main, dev]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Паралельні деплої скасовуємо, останній push перемагає
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: main
+
+      # dev може ще не існувати — тоді просто пропускаємо
+      - name: Checkout dev
+        uses: actions/checkout@v4
+        continue-on-error: true
+        with:
+          ref: dev
+          path: dev
+
+      - name: Assemble site
+        run: |
+          mkdir -p _site
+          rsync -a --exclude='.git' --exclude='.github' --exclude='source-photos' main/ _site/
+          if [ -d dev ] && [ -f dev/index.html ]; then
+            mkdir -p _site/dev
+            rsync -a --exclude='.git' --exclude='.github' --exclude='source-photos' dev/ _site/dev/
+            echo "dev-гілку опубліковано у /dev/"
+          else
+            echo "гілки dev ще немає — публікуємо лише main"
+          fi
+          ls -la _site
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
