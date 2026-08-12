@@ -25,7 +25,7 @@
 
   const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const hasGSAP = typeof window.gsap !== 'undefined';
-  const houses = D.data.houses;
+  const houses = D.data.houses || [];
   const N = houses.length;
   if (!N) return;
 

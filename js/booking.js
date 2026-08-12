@@ -25,7 +25,7 @@
   if (houseSelect && D) {
     houseSelect.innerHTML =
       '<option value="">Будь-який вільний</option>' +
-      D.data.houses.map(h => '<option value="' + h.id + '">' + h.name + '</option>').join('');
+      (D.data.houses || []).map(h => '<option value="' + h.id + '">' + h.name + '</option>').join('');
   }
 
   /* Предвибір будиночка з посилання: booking.html?house=aframe-water */

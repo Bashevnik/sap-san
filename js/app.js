@@ -173,7 +173,7 @@
   function experiences() {
     const list = $('#expList');
     if (!list || !D) return;
-    const items = D.data.experiences;
+    const items = D.data.experiences || [];
 
     list.innerHTML = items.map((it, i) => `
       <li class="exp__item" data-exp="${i}">
@@ -244,7 +244,7 @@
     const steps = $('#chaptersSteps');
     const frame = $('#chaptersFrame');
     if (!steps || !frame || !D) return;
-    const data = D.data.chapters;
+    const data = D.data.chapters || [];
 
     steps.innerHTML = data.map((c, i) => `
       <article class="chapters__step${i === 0 ? ' is-active' : ''}" data-step="${i}">
@@ -295,7 +295,7 @@
   function collage() {
     const box = $('#collage');
     if (!box || !D) return;
-    box.innerHTML = D.data.gallery.slice(0, 9).map(g => `
+    box.innerHTML = (D.data.gallery || []).slice(0, 9).map(g => `
       <figure class="gmasonry__item">
         ${D.imgTag(g.image, { alt: g.alt, sizes: '(max-width: 900px) 50vw, 32vw' })}
         <figcaption class="gmasonry__cap">${g.tag || ''}</figcaption>
@@ -320,7 +320,7 @@
   function faq() {
     const list = $('#faqList');
     if (!list || !D) return;
-    const items = D.data.faq;
+    const items = D.data.faq || [];
 
     list.innerHTML = items.map((f, i) => `
       <div class="faq__item">
@@ -368,7 +368,7 @@
   function poolTariffs() {
     const box = $('#poolTariffs');
     if (!box || !D) return;
-    box.innerHTML = D.data.pool.tariffs.map(t => `
+    box.innerHTML = (D.data.pool && D.data.pool.tariffs || []).map(t => `
       <div class="poolsplit__row">
         <dt><b>${t.label}</b><span>${t.note} · ${t.meta}</span></dt>
         <dd>${t.price.toLocaleString('uk-UA')}<small>грн</small></dd>

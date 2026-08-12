@@ -296,13 +296,39 @@
       .finally(() => clearTimeout(timer));
   }
 
-  /** Замінюємо лише ті розділи, які реально прийшли з API */
+  /**
+   * Зливаємо відповідь API з вбудованим контентом.
+   *
+   * Масиви (houses, gallery, faqGroups…) — замінюються цілком.
+   * Обʼєкти (settings, pool, housePricing) — зливаються по ключах,
+   * тому якщо адмінка надішле pool без tariffs, тарифи лишаться
+   * вбудованими, а не зникнуть. Неповна відповідь не має ламати сайт.
+   */
   function applyContent(remote) {
     if (!remote || typeof remote !== 'object') return data;
+
+    const isPlainObject = v =>
+      v && typeof v === 'object' && !Array.isArray(v);
+
     Object.keys(data).forEach(key => {
-      if (remote[key] === undefined || remote[key] === null) return;
-      if (key === 'settings') Object.assign(data.settings, remote.settings);
-      else data[key] = remote[key];
+      const incoming = remote[key];
+      if (incoming === undefined || incoming === null) return;
+
+      if (Array.isArray(data[key])) {
+        if (Array.isArray(incoming) && incoming.length) data[key] = incoming;
+        return;
+      }
+
+      if (isPlainObject(data[key]) && isPlainObject(incoming)) {
+        Object.keys(incoming).forEach(sub => {
+          if (incoming[sub] === undefined || incoming[sub] === null) return;
+          if (Array.isArray(incoming[sub]) && !incoming[sub].length) return;
+          data[key][sub] = incoming[sub];
+        });
+        return;
+      }
+
+      data[key] = incoming;
     });
     /* Похідні посилання перераховуємо після підміни адреси */
     if (data.settings.lat && data.settings.lng) {
