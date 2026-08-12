@@ -165,20 +165,26 @@
 }
 
 /* ============================================================
-   4. КОНТАКТИ — мінімалістично
+   4. КОНТАКТИ — редакційний розворот + банер карти
    ------------------------------------------------------------
-   Було: вступний рядок + 3 картки в рамках + окремий рядок
-   з кнопками + карта + мозаїка з 5 фото знизу — забагато блоків
-   для «просто контактів». Стало: один заголовок, список без
-   рамок (лише тонкі лінії-розділювачі), висока карта поруч
-   і два CTA. Жодних декоративних фото.
+   Було: голий список без жодного фото — надто аскетично для
+   преміального ресорту. Стало: заголовок → фото території поруч
+   зі списком контактів (редакційна пара, не картка в рамці) →
+   окремий full-bleed банер карти помірної висоти з підписом
+   «Тут ви можете нас знайти».
    ============================================================ */
-.contactm {
-  display: grid; grid-template-columns: .95fr 1.05fr;
-  gap: clamp(2rem, 5vw, 5rem); align-items: start;
-}
-.contactm__head { grid-column: 1 / -1; max-width: 34ch; }
+.contactm { display: grid; gap: clamp(3rem, 7vh, 5rem); }
+
+.contactm__head { position: relative; max-width: 40ch; padding-bottom: clamp(1.5rem, 5vh, 3rem); }
 .contactm__head .lead { margin-top: 1rem; }
+
+/* ---------- Редакційна пара: фото + список ---------------- */
+.contactm__split {
+  display: grid; grid-template-columns: .85fr 1.15fr;
+  gap: clamp(2rem, 5vw, 4.5rem); align-items: center;
+}
+.contactm__split-img { margin: 0; overflow: hidden; aspect-ratio: 4 / 5; }
+.contactm__split-img img { width: 100%; height: 100%; object-fit: cover; }
 
 .contactm__list { display: block; border-top: 1px solid var(--rule); }
 .contactm__row {
@@ -203,23 +209,17 @@
 
 .contactm__actions { display: flex; flex-wrap: wrap; gap: .8rem; margin-top: clamp(1.5rem, 4vh, 2.2rem); }
 
-.contactm__map {
-  position: relative; overflow: hidden;
-  aspect-ratio: 4 / 5; min-height: 380px;
-}
-.contactm__map iframe { width: 100%; height: 100%; border: 0; filter: grayscale(.15); }
-
 @media (max-width: 860px) {
-  .contactm { grid-template-columns: 1fr; }
+  .contactm__split { grid-template-columns: 1fr; }
+  .contactm__split-img { aspect-ratio: 16 / 10; }
   .contactm__row { flex-direction: column; align-items: flex-start; gap: .4rem; }
   .contactm__row dd { text-align: left; justify-items: start; }
-  .contactm__map { aspect-ratio: 4 / 3; order: -1; }
 }
 
 /* ---------- Природний мотив: гілка з листям, що промальовується ----
    Одна декоративна лінія, що «оживає» під час скролу — саме те, що
-   робить мінімалістичну сторінку теплою, а не порожньою. Малюється
-   через stroke-dasharray у reveal.js, тому в розмітці лінія завжди
+   робить сторінку теплою, а не порожньою. Малюється через
+   stroke-dasharray у reveal.js, тому в розмітці лінія завжди
    присутня повністю — без анімації просто видно готовий контур. */
 .natureline {
   display: block; overflow: visible;
@@ -227,34 +227,25 @@
   stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;
 }
 .natureline--head {
-  position: absolute; right: -1rem; bottom: -2.2rem;
+  position: absolute; right: -1rem; bottom: -1rem;
   width: clamp(220px, 30vw, 380px); height: auto;
   opacity: .55; pointer-events: none;
 }
-.contactm__head { position: relative; padding-bottom: clamp(2rem, 6vh, 3.5rem); }
-
-.contactm__divider {
-  grid-column: 1 / -1; display: flex; justify-content: center;
-  padding-top: clamp(1rem, 4vh, 2rem);
-}
-.natureline--divider { width: min(420px, 70vw); opacity: .4; }
-
 @media (max-width: 860px) {
   .natureline--head { position: static; width: min(280px, 70vw); margin-top: 1.5rem; opacity: .5; }
   .contactm__head { padding-bottom: 0; }
 }
 
-/* ---------- Природна сцена між контактами і фінальним CTA -------- */
-.contactm__scene { position: relative; }
-.contactm__scene-img { aspect-ratio: 21 / 9; min-height: 320px; }
-.contactm__scene-img img { width: 100%; height: 100%; object-fit: cover; }
-.contactm__scene-cap {
-  position: absolute; left: var(--gutter); bottom: 1.4rem; z-index: 1;
-  font-family: var(--display); font-style: italic; font-weight: 300;
-  font-size: clamp(1.1rem, 2vw, 1.6rem); color: #fff;
-  text-shadow: 0 2px 16px rgba(10,12,10,.55); max-width: 26ch;
+/* ---------- Банер карти — на всю ширину, помірної висоти -------- */
+.contactm__mapbanner { background: var(--water); color: var(--ivory); }
+.contactm__mapbanner-head {
+  padding-block: clamp(2.5rem, 6vh, 4rem) clamp(1.5rem, 4vh, 2.5rem);
 }
-@media (max-width: 700px) { .contactm__scene-img { aspect-ratio: 4 / 5; } }
+.contactm__mapbanner-head .eyebrow { color: var(--gold-soft); }
+.contactm__mapbanner-head h2 { margin-top: .6rem; max-width: 14ch; }
+
+.contactm__mapbig { position: relative; width: 100%; height: clamp(260px, 34vh, 420px); }
+.contactm__mapbig iframe { width: 100%; height: 100%; border: 0; filter: grayscale(.3) contrast(1.05) brightness(.96); }
 
 /* ============================================================
    5. СТОРІНКА БАСЕЙНУ — прибрати порожню колонку

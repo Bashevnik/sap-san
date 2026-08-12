@@ -98,7 +98,7 @@
   /* ---------- 4. REVEAL SYSTEM ---------------------------- */
   function reveals() {
     if (!hasGSAP || REDUCED) {
-      $$('.reveal-img > img').forEach(i => { i.style.clipPath = 'none'; i.style.transform = 'none'; });
+      $$('.reveal-img > img').forEach(i => { i.style.opacity = '1'; i.style.transform = 'none'; });
       return;
     }
 
@@ -129,17 +129,15 @@
       });
     });
 
-    /* 4c. Cinematic image reveal — маска + масштаб */
+    /* 4c. Cinematic image reveal — fade + масштаб, без «шторки» */
     $$('.reveal-img').forEach(box => {
       const img = $('img', box);
       if (!img) return;
-      gsap.set(img, { clipPath: 'inset(0 0 100% 0)', scale: 1.08 });
+      gsap.set(img, { opacity: 0, scale: 1.05 });
       ScrollTrigger.create({
         trigger: box, start: 'top 86%', once: true,
         onEnter() {
-          gsap.timeline()
-            .to(img, { clipPath: 'inset(0 0 0% 0)', duration: 1.5, ease: 'power4.inOut' })
-            .to(img, { scale: 1, duration: 1.9, ease: 'power3.out' }, 0);
+          gsap.to(img, { opacity: 1, scale: 1, duration: 1.6, ease: 'power3.out' });
         }
       });
     });
@@ -304,13 +302,11 @@
     if (!hasGSAP || REDUCED) return;
     $$('.gmasonry__item', box).forEach((item, i) => {
       const img = $('img', item);
-      gsap.set(img, { clipPath: 'inset(0 0 100% 0)', scale: 1.06 });
+      gsap.set(img, { opacity: 0, scale: 1.05 });
       ScrollTrigger.create({
         trigger: item, start: 'top 94%', once: true,
         onEnter() {
-          gsap.timeline({ delay: (i % 3) * 0.06 })
-            .to(img, { clipPath: 'inset(0 0 0% 0)', duration: 1.2, ease: 'power4.inOut' })
-            .to(img, { scale: 1, duration: 1.6, ease: 'power3.out' }, 0);
+          gsap.to(img, { opacity: 1, scale: 1, duration: 1.4, ease: 'power3.out', delay: (i % 3) * 0.06 });
         }
       });
     });
