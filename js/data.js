@@ -116,8 +116,8 @@
 
   /* Тарифи — з офіційного прайс-листа на оренду будиночка */
   const housePricing = {
-    weekday: { id: 'weekday', label: 'Будні дні', note: 'Понеділок — Четвер', price: 4000, unit: 'за добу' },
-    weekend: { id: 'weekend', label: 'Вихідні дні', note: 'П’ятниця — Неділя', price: 6000, unit: 'за добу' },
+    weekday: { id: 'weekday', label: 'Будні', note: 'Понеділок — Четвер', price: 4000, unit: 'за добу' },
+    weekend: { id: 'weekend', label: 'Вихідні', note: 'П’ятниця — Неділя', price: 6000, unit: 'за добу' },
     special: {
       id: 'special',
       label: 'Вікенд зі знижкою',

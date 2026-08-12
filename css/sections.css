@@ -50,7 +50,7 @@
 /* Базовий стан — JS/GSAP анімує до відкритого. */
 .reveal-img { overflow: hidden; position: relative; }
 .reveal-img img { width: 100%; height: 100%; object-fit: cover; }
-.js .reveal-img > img, .js .reveal-img > picture { clip-path: inset(0 0 100% 0); transform: scale(1.14); will-change: clip-path, transform; }
+.js .reveal-img > img, .js .reveal-img > picture { clip-path: inset(0 0 100% 0); transform: scale(1.08); will-change: clip-path, transform; }
 .js .split-line { display: block; overflow: hidden; }
 .js .split-line > span { display: block; }
 
