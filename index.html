@@ -129,26 +129,39 @@
 
 <!-- ============ 2 · КОРОТКО ПРО БАЗУ ============ -->
 <section class="section surface-ivory" id="about">
-  <div class="wrap intro__grid">
-    <p class="eyebrow intro__eyebrow" data-reveal>Про базу</p>
+  <div class="wrap intro2">
 
-    <div class="intro__statement">
+    <div class="intro2__head" data-reveal>
+      <p class="eyebrow">Про базу</p>
       <h2 class="display d1" data-split>Три будиночки, озеро і жодного зайвого звуку.</h2>
+      <svg class="intro2__wing" viewBox="0 0 600 126" aria-hidden="true">
+        <path d="M300 100C256 96 204 85 152 66C100 47 50 24 4 2C38 32 80 58 128 78C182 100 244 109 300 108Z"/>
+        <path d="M300 100C344 96 396 85 448 66C500 47 550 24 596 2C562 32 520 58 472 78C418 100 356 109 300 108Z"/>
+        <path d="M300 103C304 103 307 107 307 112L300 126L293 112C293 107 296 103 300 103Z"/>
+      </svg>
     </div>
 
-    <div class="intro__note" data-reveal>
-      <p class="lead">SAP SAN — база відпочинку в Бакалах на Київщині. A-frame з панорамним склінням стоять просто над водою, поруч — відкритий басейн, ресторан і бар. Приїздять на добу, лишаються на вихідні.</p>
-    </div>
+    <div class="intro2__body">
+      <p class="lead" data-reveal>SAP SAN — база відпочинку в Бакалах на Київщині. A-frame з панорамним
+        склінням стоять просто над водою, поруч — відкритий басейн, ресторан і бар. Приїздять на добу,
+        лишаються на вихідні.</p>
 
-    <figure class="intro__figure" data-reveal>
-      <div class="reveal-img">
-        <img src="images/cabana-lake-900.webp"
-             srcset="images/cabana-lake-640.webp 640w, images/cabana-lake-900.webp 900w"
-             sizes="(max-width: 780px) 100vw, 33vw" width="900" height="1600" loading="lazy" decoding="async"
-             alt="Шатро з білими шторами біля води на території SAP SAN">
+      <div class="intro2__gallery" data-reveal>
+        <figure class="reveal-img intro2__lg">
+          <img src="images/houses-water-wide-2-1170.webp"
+               srcset="images/houses-water-wide-2-640.webp 640w, images/houses-water-wide-2-1000.webp 1000w, images/houses-water-wide-2-1170.webp 1170w"
+               sizes="(max-width: 860px) 90vw, 46vw" width="1170" height="656" loading="lazy" decoding="async"
+               alt="Будиночки A-frame SAP SAN на воді">
+        </figure>
+        <figure class="reveal-img intro2__sm">
+          <img src="images/cabana-lake-900.webp"
+               srcset="images/cabana-lake-640.webp 640w, images/cabana-lake-900.webp 900w"
+               sizes="(max-width: 860px) 45vw, 22vw" width="900" height="1600" loading="lazy" decoding="async"
+               alt="Шатро з білими шторами біля води на території SAP SAN">
+        </figure>
       </div>
-      <figcaption class="intro__cap">Тераса над водою — те, заради чого сюди їдуть.</figcaption>
-    </figure>
+      <p class="intro2__cap">Тераса над водою — те, заради чого сюди їдуть.</p>
+    </div>
 
     <div class="intro__stats" data-reveal>
       <div class="intro__stat"><b>3</b><span>будиночки A-frame</span></div>
@@ -170,12 +183,17 @@
 
 <!-- ============ 4 · НАПРЯМКИ (hover reveal) ============ -->
 <section class="section surface-ink exp" id="experiences">
-  <div class="wrap">
-    <p class="eyebrow" data-reveal>Напрямки</p>
-    <h2 class="display d2" data-split style="max-width:14ch;margin-top:1rem;margin-bottom:clamp(2rem,6vh,4rem)">Оберіть, з чого почнеться ваш день</h2>
-    <ul class="exp__list" id="expList"></ul>
+  <div class="wrap exp__layout">
+    <div class="exp__col">
+      <p class="eyebrow" data-reveal>Напрямки</p>
+      <h2 class="display d2" data-split style="max-width:14ch;margin-top:1rem;margin-bottom:clamp(2rem,6vh,4rem)">Оберіть, з чого почнеться ваш день</h2>
+      <ul class="exp__list" id="expList"></ul>
+    </div>
+    <!-- Панель попереднього перегляду: фото завжди у власній колонці
+         й ніколи не перекриває текст пунктів. Кросс-фейд між кадрами
+         замінює попередній варіант із фото, що бігало за курсором. -->
+    <figure class="exp__preview" id="expPreview" aria-hidden="true"></figure>
   </div>
-  <div class="exp__cursor" id="expCursor" aria-hidden="true"><img alt="" decoding="async"></div>
 </section>
 
 <!-- ============ 5 · БУДИНОЧКИ (image curtain slider) ============ -->
