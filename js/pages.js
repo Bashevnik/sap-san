@@ -28,7 +28,7 @@
   function advantages() {
     const box = $('#advantages');
     if (!box) return;
-    box.innerHTML = D.data.advantages.map(a => `
+    box.innerHTML = (D.data.advantages || []).map(a => `
       <article class="adv__item" data-reveal>
         <svg class="adv__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
              stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -44,7 +44,7 @@
     const box = $('#housesList');
     if (!box) return;
     const pr = D.data.housePricing;
-    box.innerHTML = D.data.houses.map(h => `
+    box.innerHTML = (D.data.houses || []).map(h => `
       <article class="hcard" data-reveal>
         <a class="hcard__media" href="house.html?id=${h.id}" aria-label="${h.name} — детальніше">
           ${D.imgTag(h.hero, { alt: h.name + ' — SAP SAN', sizes: '(max-width: 860px) 100vw, 50vw' })}
@@ -104,17 +104,17 @@
 
         <div>
           <p class="eyebrow" style="margin-bottom:1rem">Зручності</p>
-          <ul class="hdetail__amen">${h.amenities.map(a => `<li>${a}</li>`).join('')}</ul>
+          <ul class="hdetail__amen">${(h.amenities || []).map(a => `<li>${a}</li>`).join('')}</ul>
         </div>
 
         <div>
           <p class="eyebrow" style="margin-bottom:1rem">У вартість входить</p>
-          <ul class="rules-list">${pr.included.map(i => `<li>${i}</li>`).join('')}</ul>
+          <ul class="rules-list">${(pr.included || []).map(i => `<li>${i}</li>`).join('')}</ul>
         </div>
 
         <div>
           <p class="eyebrow" style="margin-bottom:1rem">Правила заїзду та виїзду</p>
-          <ul class="rules-list">${pr.rules.map(i => `<li>${i}</li>`).join('')}</ul>
+          <ul class="rules-list">${(pr.rules || []).map(i => `<li>${i}</li>`).join('')}</ul>
         </div>
       </div>
 
@@ -134,7 +134,7 @@
     /* Галерея будиночка */
     const gal = $('#houseGallery');
     if (gal) {
-      gal.innerHTML = h.gallery.slice(0, 5).map(g => `
+      gal.innerHTML = (h.gallery || []).slice(0, 5).map(g => `
         <figure>${D.imgTag(g, { alt: h.name + ' — SAP SAN', sizes: '(max-width: 700px) 50vw, 33vw' })}</figure>`).join('');
     }
 
@@ -155,12 +155,12 @@
     if (rates) {
       const p = D.data.pool;
       rates.innerHTML =
-        p.tariffs.map(t => `
+        (p.tariffs || []).map(t => `
           <div class="rates__row">
             <dt><b>${t.label}</b><span>${t.note} · ${t.meta}</span></dt>
             <dd>${P(t.price)}</dd>
           </div>`).join('') +
-        p.children.map(c => {
+        (p.children || []).map(c => {
           /* Не дублюємо підпис, якщо він збігається з ціною
              («безкоштовно» — і в ціні, і в примітці) */
           const priceText = c.price === null ? 'уточнюйте' : P(c.price);
@@ -171,7 +171,7 @@
             <dd>${c.price === null ? '<small style="margin:0">уточнюйте</small>' : P(c.price)}</dd>
           </div>`;
         }).join('') +
-        p.extras.map(e => `
+        (p.extras || []).map(e => `
           <div class="rates__row">
             <dt><b>${e.label}</b><span>додаткова оренда</span></dt>
             <dd>${P(e.price)}</dd>
@@ -179,14 +179,14 @@
     }
 
     const incl = $('#poolIncluded');
-    if (incl) incl.innerHTML = D.data.pool.included.map(i => `<span class="chip">${i}</span>`).join('');
+    if (incl) incl.innerHTML = (D.data.pool.included || []).map(i => `<span class="chip">${i}</span>`).join('');
 
     const rl = $('#poolRules');
-    if (rl) rl.innerHTML = D.data.pool.rules.map(r => `<li>${r}</li>`).join('');
+    if (rl) rl.innerHTML = (D.data.pool.rules || []).map(r => `<li>${r}</li>`).join('');
 
     const pg = $('#poolGallery');
     if (pg) {
-      pg.innerHTML = D.data.pool.gallery.slice(0, 5).map(g => `
+      pg.innerHTML = (D.data.pool.gallery || []).slice(0, 5).map(g => `
         <figure>${D.imgTag(g, { alt: 'Басейн SAP SAN', sizes: '(max-width: 700px) 50vw, 33vw' })}</figure>`).join('');
     }
   }
@@ -195,11 +195,11 @@
   function galleryPage() {
     const grid = $('#ggrid');
     if (!grid) return;
-    const items = D.data.gallery;
+    const items = D.data.gallery || [];
 
     const filter = $('#gfilter');
     if (filter) {
-      filter.innerHTML = D.data.galleryTags.map((t, i) =>
+      filter.innerHTML = (D.data.galleryTags || []).map((t, i) =>
         `<button type="button" data-tag="${t}" aria-pressed="${i === 0}">${t}</button>`).join('');
     }
 
@@ -271,7 +271,7 @@
     const box = $('#faqGroups');
     if (!box) return;
 
-    box.innerHTML = D.data.faqGroups.map((g, gi) => `
+    box.innerHTML = (D.data.faqGroups || []).map((g, gi) => `
       <section class="faq__group" data-reveal>
         <h2 class="display d3" style="margin-bottom:1.2rem">${g.title}</h2>
         <div class="faq__list">
