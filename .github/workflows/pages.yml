@@ -1,9 +1,17 @@
 name: Deploy to GitHub Pages
 
-# Хостимо ДВІ гілки одночасно:
+# Публікуємо обидві гілки одним деплоєм:
 #   main → https://<user>.github.io/sap-san/
 #   dev  → https://<user>.github.io/sap-san/dev/
-# Робочу гілку бота можна дивитися онлайн, не чіпаючи прод.
+#
+# ВАЖЛИВО: середовище github-pages за замовчуванням дозволяє деплой
+# лише з гілки за замовчуванням. Тому крок deploy виконується тільки
+# для main — інакше запуски з dev падали б з помилкою.
+# Вміст dev при цьому все одно потрапляє в збірку.
+#
+# Якщо потрібно, щоб пуш у dev теж одразу оновлював прев'ю:
+#   Settings → Environments → github-pages → Deployment branches
+#   → No restriction. Після цього приберіть умову if: у джобі deploy.
 
 on:
   push:
@@ -15,10 +23,10 @@ permissions:
   pages: write
   id-token: write
 
-# Паралельні деплої скасовуємо, останній push перемагає
+# Черга, а не скасування: інакше пуш у dev обриває деплой main
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -49,7 +57,8 @@ jobs:
           else
             echo "гілки dev ще немає — публікуємо лише main"
           fi
-          ls -la _site
+          echo "--- вміст _site ---"
+          ls _site
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
@@ -58,6 +67,8 @@ jobs:
 
   deploy:
     needs: build
+    # Деплоїмо лише з main — обмеження середовища github-pages
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
