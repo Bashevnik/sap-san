@@ -165,44 +165,55 @@
 }
 
 /* ============================================================
-   4. КОНТАКТИ — дорожче
+   4. КОНТАКТИ — мінімалістично
+   ------------------------------------------------------------
+   Було: вступний рядок + 3 картки в рамках + окремий рядок
+   з кнопками + карта + мозаїка з 5 фото знизу — забагато блоків
+   для «просто контактів». Стало: один заголовок, список без
+   рамок (лише тонкі лінії-розділювачі), висока карта поруч
+   і два CTA. Жодних декоративних фото.
    ============================================================ */
-.contactx { display: grid; gap: clamp(2.5rem, 6vh, 4.5rem); }
+.contactm {
+  display: grid; grid-template-columns: .95fr 1.05fr;
+  gap: clamp(2rem, 5vw, 5rem); align-items: start;
+}
+.contactm__head { grid-column: 1 / -1; max-width: 34ch; }
+.contactm__head .lead { margin-top: 1rem; }
 
-.contactx__grid {
-  display: grid; grid-template-columns: repeat(3, 1fr);
-  gap: clamp(1.5rem, 3vw, 3rem);
+.contactm__list { display: block; border-top: 1px solid var(--rule); }
+.contactm__row {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap;
+  padding-block: clamp(1.1rem, 3vh, 1.6rem);
+  border-bottom: 1px solid var(--rule);
 }
-.contactx__card {
-  display: grid; gap: .7rem; align-content: start;
-  padding-top: 1.6rem; border-top: 1px solid var(--rule);
+.contactm__row dt {
+  font-size: var(--fs-eyebrow); letter-spacing: .24em; text-transform: uppercase;
+  color: var(--fg-muted); font-weight: 500; flex: none;
 }
-.contactx__card b {
-  font-size: var(--fs-eyebrow); letter-spacing: .26em; text-transform: uppercase;
-  color: var(--accent); font-weight: 500;
+.contactm__row dd {
+  margin: 0; text-align: right; display: grid; gap: .3rem; justify-items: end;
 }
-.contactx__card a, .contactx__card span {
+.contactm__row a, .contactm__row span {
   font-family: var(--display); font-weight: 300;
-  font-size: clamp(1.3rem, 2.1vw, 1.9rem); line-height: 1.2;
+  font-size: clamp(1.15rem, 1.8vw, 1.5rem); line-height: 1.25;
   transition: color .4s var(--ease);
 }
-.contactx__card a:hover { color: var(--accent); }
-.contactx__card small { font-size: var(--fs-small); color: var(--fg-muted); font-family: var(--sans); }
+.contactm__row a:hover { color: var(--accent); }
+.contactm__row small { font-size: var(--fs-small); color: var(--fg-muted); font-family: var(--sans); }
 
-.contactx__map {
+.contactm__actions { display: flex; flex-wrap: wrap; gap: .8rem; margin-top: clamp(1.5rem, 4vh, 2.2rem); }
+
+.contactm__map {
   position: relative; overflow: hidden;
-  aspect-ratio: 21 / 8; min-height: 320px;
-  border: 1px solid var(--rule);
+  aspect-ratio: 4 / 5; min-height: 380px;
 }
-.contactx__map iframe { width: 100%; height: 100%; border: 0; }
-.contactx__maprow { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between; }
+.contactm__map iframe { width: 100%; height: 100%; border: 0; filter: grayscale(.15); }
 
-@media (max-width: 900px) {
-  .contactx__grid { grid-template-columns: 1fr 1fr; }
-  .contactx__map { aspect-ratio: 4 / 3; }
-}
-@media (max-width: 560px) {
-  .contactx__grid { grid-template-columns: 1fr; }
+@media (max-width: 860px) {
+  .contactm { grid-template-columns: 1fr; }
+  .contactm__row { flex-direction: column; align-items: flex-start; gap: .4rem; }
+  .contactm__row dd { text-align: left; justify-items: start; }
+  .contactm__map { aspect-ratio: 4 / 3; order: -1; }
 }
 
 /* ============================================================
