@@ -104,7 +104,10 @@ h1, h2, h3, h4, p, figure, blockquote { margin: 0; }
 }
 .eyebrow--muted { color: var(--fg-muted); }
 
-.lead { font-size: var(--fs-lead); line-height: 1.6; color: var(--fg-muted); max-width: 46ch; }
+/* Текст не має тиснутися у вузьку колонку — 46ch було замало */
+.lead { font-size: var(--fs-lead); line-height: 1.62; color: var(--fg-muted); max-width: 62ch; }
+.lead--tight { max-width: 46ch; }
+.measure { max-width: 68ch; }
 .muted { color: var(--fg-muted); }
 .small { font-size: var(--fs-small); line-height: 1.55; }
 .num {

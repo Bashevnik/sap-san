@@ -288,32 +288,30 @@
     });
   }
 
-  /* ---------- 7. COLLAGE ---------------------------------- */
+  /* ---------- 7. ГАЛЕРЕЯ НА ГОЛОВНІЙ ----------------------
+     Масонрі в колонках: кадри стають один під одного щільно,
+     без дір і рваного низу, які були у попередньому колажі.
+     Паралакс тут не застосовуємо — він ламає розкладку колонок. */
   function collage() {
     const box = $('#collage');
     if (!box || !D) return;
-    box.innerHTML = D.data.gallery.map(g => `
-      <figure class="collage__item">
-        ${D.imgTag(g.image, { alt: g.alt, sizes: '(max-width: 780px) 60vw, 35vw' })}
-        <figcaption class="collage__cap">${g.alt.split(' ').slice(0, 3).join(' ')}</figcaption>
+    box.innerHTML = D.data.gallery.slice(0, 9).map(g => `
+      <figure class="gmasonry__item">
+        ${D.imgTag(g.image, { alt: g.alt, sizes: '(max-width: 900px) 50vw, 32vw' })}
+        <figcaption class="gmasonry__cap">${g.tag || ''}</figcaption>
       </figure>`).join('');
 
     if (!hasGSAP || REDUCED) return;
-    $$('.collage__item', box).forEach((item, i) => {
+    $$('.gmasonry__item', box).forEach((item, i) => {
       const img = $('img', item);
-      gsap.set(img, { clipPath: 'inset(0 0 100% 0)', scale: 1.12 });
+      gsap.set(img, { clipPath: 'inset(0 0 100% 0)', scale: 1.1 });
       ScrollTrigger.create({
-        trigger: item, start: 'top 92%', once: true,
+        trigger: item, start: 'top 94%', once: true,
         onEnter() {
-          gsap.timeline({ delay: (i % 3) * 0.07 })
-            .to(img, { clipPath: 'inset(0 0 0% 0)', duration: 1.3, ease: 'power4.inOut' })
-            .to(img, { scale: 1, duration: 1.7, ease: 'power3.out' }, 0);
+          gsap.timeline({ delay: (i % 3) * 0.06 })
+            .to(img, { clipPath: 'inset(0 0 0% 0)', duration: 1.2, ease: 'power4.inOut' })
+            .to(img, { scale: 1, duration: 1.6, ease: 'power3.out' }, 0);
         }
-      });
-      /* делікатний паралакс — різна швидкість колонок */
-      gsap.fromTo(item, { y: (i % 3 - 1) * 14 }, {
-        y: (i % 3 - 1) * -14, ease: 'none',
-        scrollTrigger: { trigger: item, start: 'top bottom', end: 'bottom top', scrub: true }
       });
     });
   }
@@ -371,7 +369,7 @@
     const box = $('#poolTariffs');
     if (!box || !D) return;
     box.innerHTML = D.data.pool.tariffs.map(t => `
-      <div class="poolfilm__row">
+      <div class="poolsplit__row">
         <dt><b>${t.label}</b><span>${t.note} · ${t.meta}</span></dt>
         <dd>${t.price.toLocaleString('uk-UA')}<small>грн</small></dd>
       </div>`).join('');

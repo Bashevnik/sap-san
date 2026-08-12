@@ -160,11 +160,17 @@
             <dt><b>${t.label}</b><span>${t.note} · ${t.meta}</span></dt>
             <dd>${P(t.price)}</dd>
           </div>`).join('') +
-        p.children.map(c => `
+        p.children.map(c => {
+          /* Не дублюємо підпис, якщо він збігається з ціною
+             («безкоштовно» — і в ціні, і в примітці) */
+          const priceText = c.price === null ? 'уточнюйте' : P(c.price);
+          const note = (c.note && c.note.toLowerCase() !== priceText.toLowerCase()) ? c.note : '';
+          return `
           <div class="rates__row">
-            <dt><b>${c.label}</b><span>${c.note}</span></dt>
+            <dt><b>${c.label}</b>${note ? '<span>' + note + '</span>' : ''}</dt>
             <dd>${c.price === null ? '<small style="margin:0">уточнюйте</small>' : P(c.price)}</dd>
-          </div>`).join('') +
+          </div>`;
+        }).join('') +
         p.extras.map(e => `
           <div class="rates__row">
             <dt><b>${e.label}</b><span>додаткова оренда</span></dt>
@@ -180,7 +186,7 @@
 
     const pg = $('#poolGallery');
     if (pg) {
-      pg.innerHTML = D.data.pool.gallery.map(g => `
+      pg.innerHTML = D.data.pool.gallery.slice(0, 5).map(g => `
         <figure>${D.imgTag(g, { alt: 'Басейн SAP SAN', sizes: '(max-width: 700px) 50vw, 33vw' })}</figure>`).join('');
     }
   }
@@ -319,19 +325,53 @@
       frame.innerHTML = '<iframe title="Розташування SAP SAN на карті" loading="lazy" ' +
         'referrerpolicy="no-referrer-when-downgrade" allowfullscreen src="' + S.mapEmbed + '"></iframe>';
     }
+
+    const route = $('#routeBtn');
+    if (route) route.href = S.routeLink;
+
+    /* Картки контактів — великий serif замість дрібного списку */
+    const cards = $('#contactCards');
+    if (cards) {
+      cards.innerHTML = `
+        <div class="contactx__card">
+          <b>Телефон</b>
+          <a href="tel:${S.phoneHref}">${S.phone}</a>
+          <small>Щодня ${S.hours.replace('Щодня ', '')}</small>
+        </div>
+        <div class="contactx__card">
+          <b>Соцмережі та пошта</b>
+          <a href="${S.instagram}" target="_blank" rel="noopener">${S.instagramLabel}</a>
+          <a href="mailto:${S.email}" style="font-size:clamp(1rem,1.4vw,1.2rem)">${S.email}</a>
+        </div>
+        <div class="contactx__card">
+          <b>Адреса</b>
+          <a href="${S.mapLink}" target="_blank" rel="noopener">${S.address}</a>
+          <small>${S.addressFull}</small>
+          <small>Заїзд з ${S.checkIn} · виїзд до ${S.checkOut}</small>
+        </div>`;
+    }
+
+    /* Невелика мозаїка території — щоб сторінка не була голою */
+    const cg = $('#contactGallery');
+    if (cg) {
+      ['houses-water-wide', 'pool-cabanas-wide', 'cabana-lake', 'rattan-chair', 'drink-passion']
+        .forEach(slug => {
+          const fig = document.createElement('figure');
+          fig.innerHTML = D.imgTag(slug, { alt: 'Територія SAP SAN', sizes: '(max-width: 700px) 50vw, 25vw' });
+          cg.appendChild(fig);
+        });
+    }
+
+    /* Старий вузький блок — лишається сумісним, якщо десь ще використовується */
     const info = $('#mapInfo');
     if (info) {
       info.innerHTML = `
-        <div class="contact-line"><b>Адреса</b>
-          <a href="${S.mapLink}" target="_blank" rel="noopener">${S.addressFull}</a></div>
-        <div class="contact-line"><b>Телефон</b>
-          <a href="tel:${S.phoneHref}">${S.phone}</a></div>
-        <div class="contact-line"><b>Email</b>
-          <a href="mailto:${S.email}">${S.email}</a></div>
+        <div class="contact-line"><b>Телефон</b><a href="tel:${S.phoneHref}">${S.phone}</a></div>
         <div class="contact-line"><b>Instagram</b>
           <a href="${S.instagram}" target="_blank" rel="noopener">${S.instagramLabel}</a></div>
+        <div class="contact-line"><b>Адреса</b>
+          <a href="${S.mapLink}" target="_blank" rel="noopener">${S.address}</a></div>
         <div class="contact-line"><b>Графік роботи</b><span>${S.hours}</span></div>
-        <div class="contact-line"><b>Заїзд · виїзд</b><span>з ${S.checkIn} · до ${S.checkOut}</span></div>
         <div style="display:flex;flex-wrap:wrap;gap:.8rem;margin-top:.5rem">
           <a class="btn btn--primary" href="${S.routeLink}" target="_blank" rel="noopener">Прокласти маршрут ${ARROW}</a>
           <a class="btn btn--ghost" href="booking.html">Забронювати</a>

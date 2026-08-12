@@ -27,6 +27,7 @@
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/sections.css">
 <link rel="stylesheet" href="css/pages.css">
+<link rel="stylesheet" href="css/redesign.css">
 <script>document.documentElement.classList.add('js');</script>
 
 <script type="application/ld+json">
@@ -235,35 +236,37 @@
   </div>
 </section>
 
-<!-- ============ 6 · БАСЕЙН ============ -->
-<section class="poolfilm" id="pool">
-  <div class="poolfilm__media" id="poolMedia">
+<!-- ============ 6 · БАСЕЙН (split screen) ============ -->
+<section class="poolsplit" id="pool">
+  <div class="poolsplit__media" id="poolMedia">
     <picture>
-      <source media="(max-width: 700px)"
-              srcset="images/pool-wide-blue-640.webp 640w, images/pool-wide-blue-900.webp 900w"
-              sizes="100vw" width="900" height="1600">
+      <source media="(max-width: 900px)"
+              srcset="images/pool-cabanas-wide-640.webp 640w, images/pool-cabanas-wide-1000.webp 1000w, images/pool-cabanas-wide-1200.webp 1200w"
+              sizes="100vw" width="1200" height="1600">
       <img src="images/pool-cabanas-1170.webp"
            srcset="images/pool-cabanas-640.webp 640w, images/pool-cabanas-1000.webp 1000w, images/pool-cabanas-1170.webp 1170w"
-           sizes="100vw" width="1170" height="867" loading="lazy" decoding="async"
+           sizes="(max-width: 900px) 100vw, 52vw" width="1170" height="867" loading="lazy" decoding="async"
            alt="Відкритий басейн SAP SAN із шезлонгами та шатрами над озером">
     </picture>
   </div>
-  <div class="wrap poolfilm__body">
+
+  <div class="poolsplit__body">
     <p class="eyebrow" data-reveal>Басейн і шезлонги</p>
-    <h2 class="display d1" data-split style="max-width:11ch;margin-top:.6rem">Відкрита вода над озером</h2>
-    <p class="lead" data-reveal style="color:rgba(245,242,234,.75);margin-top:1.2rem">Шезлонг, парасолька та роздягальня вже у вартості квитка. Діти до 5 років — безкоштовно. Щодня з 10:00 до 22:00.</p>
+    <h2 class="display d2" data-split style="max-width:13ch">Відкрита вода над озером</h2>
+    <p class="lead" data-reveal>Шезлонг, парасолька та роздягальня вже у вартості квитка.
+      Діти до 5 років — безкоштовно. Працюємо щодня з 10:00 до 22:00.</p>
 
-    <dl class="poolfilm__tariffs" id="poolTariffs" data-reveal></dl>
+    <dl class="poolsplit__rates" id="poolTariffs" data-reveal></dl>
 
-    <div class="poolfilm__extras" data-reveal>
+    <div class="poolsplit__chips" data-reveal>
       <span class="chip">Рушник — 100 грн</span>
       <span class="chip">Халат — 200 грн</span>
       <span class="chip">Вечірні години 18:00 — 22:00</span>
     </div>
 
-    <div style="margin-top:clamp(1.8rem,5vh,2.6rem);display:flex;gap:.9rem;flex-wrap:wrap" data-reveal>
+    <div class="poolsplit__cta" data-reveal>
       <a class="btn btn--primary" href="booking.html?type=sunbeds">Забронювати шезлонг</a>
-      <a class="btn btn--ghost" href="pool.html" style="color:#F5F2EA;border-color:rgba(245,242,234,.4)">Про басейн</a>
+      <a class="btn btn--ghost" href="pool.html">Про басейн</a>
     </div>
   </div>
 </section>
@@ -287,33 +290,47 @@
 <!-- ============ 8 · КУХНЯ / МЕНЮ ============ -->
 <section class="section surface-ivory" id="kitchen">
   <div class="wrap">
-    <div class="kitchen__grid">
-      <div class="kitchen__text">
+    <div class="kitchen2__head">
+      <div>
         <p class="eyebrow" data-reveal>Кухня і бар</p>
-        <h2 class="display d1" data-split style="max-width:10ch;margin-top:.6rem">Смак, який <em>тримає</em> вечір</h2>
+        <h2 class="display d1" data-split style="max-width:11ch;margin-top:.6rem">Смак, який <em>тримає</em> вечір</h2>
       </div>
-
-      <figure class="kitchen__a" data-reveal>
-        <div class="reveal-img">
-          <img src="images/drink-grapefruit-1170.webp" srcset="images/drink-grapefruit-640.webp 640w, images/drink-grapefruit-1000.webp 1000w, images/drink-grapefruit-1170.webp 1170w" sizes="(max-width:780px) 100vw, 25vw" width="1170" height="2045" loading="lazy" decoding="async" alt="Авторський коктейль із грейпфрутом та розмарином">
+      <div data-reveal>
+        <p class="lead">Ресторан SAPSAN і авторський бар працюють просто на території,
+          щодня з 10:00 до 22:00. Не треба нікуди їхати — сніданок, обід і вечеря
+          за кілька кроків від шезлонга, а ввечері бармен зробить щось окреме.</p>
+        <div class="kitchen2__actions">
+          <a class="btn btn--primary" href="https://sapsan-resort.choiceqr.com/" target="_blank" rel="noopener">Відкрити меню
+            <svg class="btn__icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M5 11L11 5M6 5h5v5"/></svg>
+          </a>
         </div>
+      </div>
+    </div>
+
+    <div class="kitchen2__strip">
+      <figure class="kitchen2__cell" data-reveal>
+        <img src="images/drink-grapefruit-1170.webp" srcset="images/drink-grapefruit-640.webp 640w, images/drink-grapefruit-1000.webp 1000w, images/drink-grapefruit-1170.webp 1170w" sizes="(max-width:900px) 50vw, 25vw" width="1170" height="2045" loading="lazy" decoding="async" alt="Авторський коктейль із грейпфрутом та розмарином">
+        <figcaption class="kitchen2__cap">Авторські напої</figcaption>
       </figure>
 
-      <figure class="kitchen__b" data-reveal>
-        <div class="reveal-img">
-          <img src="images/drink-passion-1170.webp" srcset="images/drink-passion-640.webp 640w, images/drink-passion-1000.webp 1000w, images/drink-passion-1170.webp 1170w" sizes="(max-width:780px) 100vw, 30vw" width="1170" height="2047" loading="lazy" decoding="async" alt="Коктейль із маракуйєю біля басейну">
-        </div>
+      <figure class="kitchen2__cell" data-reveal>
+        <img src="images/drink-passion-1170.webp" srcset="images/drink-passion-640.webp 640w, images/drink-passion-1000.webp 1000w, images/drink-passion-1170.webp 1170w" sizes="(max-width:900px) 50vw, 25vw" width="1170" height="2047" loading="lazy" decoding="async" alt="Коктейль із маракуйєю біля басейну">
+        <figcaption class="kitchen2__cap">Біля басейну</figcaption>
       </figure>
 
-      <figure class="kitchen__c" data-reveal>
-        <div class="reveal-img">
-          <img src="images/bar-pour-1169.webp" srcset="images/bar-pour-640.webp 640w, images/bar-pour-1000.webp 1000w, images/bar-pour-1169.webp 1169w" sizes="(max-width:780px) 100vw, 33vw" width="1169" height="1922" loading="lazy" decoding="async" alt="Бармен SAP SAN готує напої">
-        </div>
+      <figure class="kitchen2__cell" data-reveal>
+        <img src="images/bar-pour-1169.webp" srcset="images/bar-pour-640.webp 640w, images/bar-pour-1000.webp 1000w, images/bar-pour-1169.webp 1169w" sizes="(max-width:900px) 50vw, 25vw" width="1169" height="1922" loading="lazy" decoding="async" alt="Бармен SAP SAN готує напої">
+        <figcaption class="kitchen2__cap">Бар</figcaption>
       </figure>
 
-      <div class="kitchen__cta" data-reveal>
-        <p class="lead">Ресторан SAPSAN і авторський бар працюють просто на території, щодня з 10:00 до 22:00. Не треба нікуди їхати — усе за кілька кроків від шезлонга.</p>
-        <a class="btn btn--primary" href="https://sapsan-resort.choiceqr.com/" target="_blank" rel="noopener">Відкрити меню
+      <div class="kitchen2__card" data-reveal>
+        <svg class="wing-sm" viewBox="0 0 600 126" fill="currentColor" aria-hidden="true"><path d="M300 100C256 96 204 85 152 66C100 47 50 24 4 2C38 32 80 58 128 78C182 100 244 109 300 108Z"/><path d="M300 100C344 96 396 85 448 66C500 47 550 24 596 2C562 32 520 58 472 78C418 100 356 109 300 108Z"/><path d="M300 103C304 103 307 107 307 112L300 126L293 112C293 107 296 103 300 103Z"/></svg>
+        <div>
+          <p class="eyebrow" style="color:var(--gold-soft)">Ресторан</p>
+          <p class="display d3" style="margin-top:.5rem">SAPSAN</p>
+          <p style="margin-top:.6rem">Актуальне меню й ціни — онлайн, оновлюються рестораном.</p>
+        </div>
+        <a class="btn btn--light" href="https://sapsan-resort.choiceqr.com/" target="_blank" rel="noopener">Меню
           <svg class="btn__icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M5 11L11 5M6 5h5v5"/></svg>
         </a>
       </div>
@@ -331,7 +348,7 @@
       </div>
       <a class="btn btn--ghost" href="gallery.html" data-reveal>Уся галерея</a>
     </div>
-    <div class="collage" id="collage"></div>
+    <div class="gmasonry" id="collage"></div>
   </div>
 </section>
 

@@ -21,12 +21,13 @@
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/sections.css">
 <link rel="stylesheet" href="css/pages.css">
+<link rel="stylesheet" href="css/redesign.css">
 <script>document.documentElement.classList.add('js');</script>
 </head>
 <body>
 <a class="skip-link" href="#main">Перейти до вмісту</a>
 <header class="header" id="header"></header>
-<div class="menu" id="menu" aria-hidden="true" tabindex="-1"></div>
+<div class="menu" id="menu" aria-hidden="true"></div>
 
 <section class="page-hero">
   <div class="page-hero__media">
@@ -41,9 +42,35 @@
 </section>
 <main id="main">
   <section class="section surface-ivory">
-    <div class="wrap mapblock">
-      <div class="mapblock__info" id="mapInfo" data-reveal></div>
-      <div class="mapblock__frame" id="mapFrame" data-reveal></div>
+    <div class="wrap contactx">
+
+      <div style="display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(1.5rem,4vw,4rem);align-items:end" data-reveal>
+        <div>
+          <p class="eyebrow">Звʼязок</p>
+          <h2 class="display d1" style="margin-top:.6rem;max-width:12ch">Завжди на звʼязку</h2>
+        </div>
+        <p class="lead">Зателефонуйте або напишіть у Instagram — підкажемо вільні дати,
+          розкажемо про будиночки й підберемо найзручніший маршрут.</p>
+      </div>
+
+      <div class="contactx__grid" id="contactCards" data-reveal></div>
+
+      <div class="contactx__maprow" data-reveal>
+        <div>
+          <p class="eyebrow">Як дістатися</p>
+          <p class="lead" style="margin-top:.5rem">Бакали, Київська область. Натисніть кнопку — маршрут відкриється у вашому навігаторі.</p>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:.8rem">
+          <a class="btn btn--primary" id="routeBtn" href="#" target="_blank" rel="noopener">Прокласти маршрут
+            <svg class="btn__icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2 8h12M9 3l5 5-5 5"/></svg>
+          </a>
+          <a class="btn btn--ghost" href="booking.html">Забронювати</a>
+        </div>
+      </div>
+
+      <div class="contactx__map" id="mapFrame" data-reveal></div>
+
+      <div class="hgal" id="contactGallery" data-reveal></div>
     </div>
   </section>
 </main>
@@ -62,7 +89,6 @@
 <footer class="footer surface-ink" id="footer"></footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
-<script src="js/config.js" defer></script>
 <script src="js/images.js" defer></script>
 <script src="js/data.js" defer></script>
 <script src="js/chrome.js" defer></script>

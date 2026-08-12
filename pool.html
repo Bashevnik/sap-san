@@ -21,12 +21,13 @@
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/sections.css">
 <link rel="stylesheet" href="css/pages.css">
+<link rel="stylesheet" href="css/redesign.css">
 <script>document.documentElement.classList.add('js');</script>
 </head>
 <body>
 <a class="skip-link" href="#main">Перейти до вмісту</a>
 <header class="header" id="header"></header>
-<div class="menu" id="menu" aria-hidden="true" tabindex="-1"></div>
+<div class="menu" id="menu" aria-hidden="true"></div>
 
 <section class="page-hero">
   <div class="page-hero__media">
@@ -41,33 +42,44 @@
 </section>
 <main id="main">
   <section class="section surface-ivory">
-    <div class="wrap" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:clamp(2rem,5vw,4.5rem);align-items:start">
+    <div class="wrap poolpage__top">
       <div data-reveal>
         <p class="eyebrow">Прайс</p>
-        <h2 class="display d2" style="margin:.6rem 0 1.5rem;max-width:12ch">Вартість відвідування</h2>
+        <h2 class="display d2" style="margin:.6rem 0 1.2rem;max-width:14ch">Вартість відвідування</h2>
+        <p class="lead" style="margin-bottom:1.8rem">Один квиток — цілий день біля води.
+          Шезлонг, парасолька та роздягальня вже входять у вартість, доплачувати
+          на місці не треба.</p>
         <dl class="rates" id="poolRates"></dl>
         <p class="small muted" style="margin-top:1rem">Ціни вказано за одну особу.</p>
       </div>
-      <div data-reveal style="display:grid;gap:1.6rem">
-        <div>
-          <p class="eyebrow" style="margin-bottom:.8rem">Години роботи</p>
-          <p class="display d3">Щодня 10:00 — 22:00</p>
-          <p class="small muted" style="margin-top:.5rem">Вечірні години — з 18:00 до 22:00 за окремим тарифом.</p>
+
+      <div class="poolpage__aside" data-reveal>
+        <div class="poolpage__hours">
+          <p class="eyebrow" style="margin-bottom:.7rem">Години роботи</p>
+          <b>10:00 — 22:00</b>
+          <p class="small muted" style="margin-top:.5rem">Щодня. Вечірні години — з 18:00 до 22:00 за окремим тарифом.</p>
         </div>
         <div>
           <p class="eyebrow" style="margin-bottom:.8rem">Уже у вартості квитка</p>
           <div style="display:flex;flex-wrap:wrap;gap:.5rem" id="poolIncluded"></div>
         </div>
-        <a class="btn btn--primary" href="booking.html?type=sunbeds" style="justify-self:start">Забронювати шезлонг</a>
+        <figure class="poolpage__figure">
+          <img src="images/pool-wide-blue-900.webp" srcset="images/pool-wide-blue-640.webp 640w, images/pool-wide-blue-900.webp 900w" sizes="(max-width:900px) 100vw, 34vw" width="900" height="1600" loading="lazy" decoding="async" alt="Чиста вода басейну SAP SAN">
+        </figure>
+        <a class="btn btn--primary" href="booking.html?type=sunbeds">Забронювати шезлонг</a>
+        <a class="btn btn--ghost" href="tel:+380980938099">098 093 80 99</a>
       </div>
     </div>
   </section>
 
   <section class="section surface-water">
-    <div class="wrap" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:clamp(2rem,5vw,4rem)">
+    <div class="wrap poolpage__rules">
       <div data-reveal>
         <p class="eyebrow">Правила</p>
-        <h2 class="display d2" style="margin:.6rem 0 1.5rem;max-width:12ch">Правила відвідування</h2>
+        <h2 class="display d2" style="margin:.6rem 0 1rem;max-width:12ch">Правила відвідування</h2>
+        <p class="lead">Коротко про те, що варто знати до приїзду.
+          Повний перелік і відповіді на часті питання — на сторінці «Правила».</p>
+        <a class="btn btn--ghost" href="rules.html" style="margin-top:1.4rem">Правила та FAQ</a>
       </div>
       <ul class="rules-list" id="poolRules" data-reveal></ul>
     </div>
@@ -96,7 +108,6 @@
 <footer class="footer surface-ink" id="footer"></footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
-<script src="js/config.js" defer></script>
 <script src="js/images.js" defer></script>
 <script src="js/data.js" defer></script>
 <script src="js/chrome.js" defer></script>
