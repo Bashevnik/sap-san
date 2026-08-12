@@ -12,7 +12,7 @@
      apiBase: 'https://sapsan-bot.vercel.app/api'
    ============================================================ */
 window.SAPSAN_CONFIG = {
-  apiBase: '',
+  apiBase: 'https://sapsanbot.vercel.app/api',
 
   /* Скільки секунд тримати відповідь /content у пам'яті вкладки */
   cacheTtl: 60,
