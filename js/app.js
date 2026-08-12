@@ -183,18 +183,40 @@
         <div class="exp__mobile">${D.imgTag(it.image, { alt: it.label + ' — SAP SAN', sizes: '100vw' })}</div>
       </li>`).join('');
 
-    const cursor = $('#expCursor');
-    const cursorImg = cursor ? $('img', cursor) : null;
+    /* Панель попереднього перегляду: усі кадри в DOM одразу,
+       перемикання — простий крос-фейд класом .is-active.
+       Живе у власній колонці в потоці документа, тому фізично
+       не може лягти поверх тексту й не залежить від скролу —
+       на відміну від попереднього position:fixed-курсора. */
+    const preview = $('#expPreview');
+    if (preview) {
+      preview.innerHTML = items.map((it, i) =>
+        D.imgTag(it.image, {
+          alt: it.label + ' — SAP SAN',
+          sizes: '(max-width: 900px) 0px, 40vw',
+          className: i === 0 ? 'is-active' : ''
+        })
+      ).join('');
+    }
+    const previewImgs = preview ? $$('img', preview) : [];
+    const showPreview = i => previewImgs.forEach((img, k) => img.classList.toggle('is-active', k === i));
 
     /* Режим визначаємо в момент події, а не один раз при завантаженні:
        гібридні ноутбуки, ресайз і поворот екрана інакше ламають логіку. */
     const isTouchMode = () =>
-      window.matchMedia('(hover: none)').matches || window.innerWidth <= 780;
+      window.matchMedia('(hover: none)').matches || window.innerWidth <= 900;
 
-    /* Тап-fallback: перший тап розкриває фото, другий веде за посиланням */
-    $$('.exp__item', list).forEach(item => {
+    $$('.exp__item', list).forEach((item, i) => {
       const link = $('.exp__link', item);
       const box = $('.exp__mobile', item);
+
+      /* Desktop: наведення перемикає кадр у панелі праворуч */
+      item.addEventListener('mouseenter', () => {
+        if (isTouchMode()) return;
+        showPreview(i);
+      });
+
+      /* Тап-fallback: перший тап розкриває фото під пунктом, другий веде за посиланням */
       link.addEventListener('click', e => {
         if (!isTouchMode()) return;
         if (item.classList.contains('is-open')) return;
@@ -207,34 +229,6 @@
         box.style.height = box.scrollHeight + 'px';
       });
     });
-
-    /* Desktop: фото слідує за курсором, розкриваючись маскою */
-    if (!cursor || !hasGSAP || REDUCED) return;
-    const xTo = gsap.quickTo(cursor, 'x', { duration: 0.7, ease: 'power3' });
-    const yTo = gsap.quickTo(cursor, 'y', { duration: 0.7, ease: 'power3' });
-    let active = -1;
-
-    $$('.exp__item', list).forEach((item, i) => {
-      item.addEventListener('mouseenter', () => {
-        if (isTouchMode()) return;
-        active = i;
-        cursorImg.src = D.img(items[i].image);
-        cursorImg.alt = '';
-        cursor.classList.add('exp__cursor--on');
-      });
-    });
-    const hide = () => { active = -1; cursor.classList.remove('exp__cursor--on'); };
-    list.addEventListener('mouseleave', hide);
-    /* Страховка: курсор пішов зі сторінки або користувач гортає далі */
-    document.addEventListener('mouseleave', hide);
-    window.addEventListener('blur', hide);
-    window.addEventListener('scroll', () => { if (active >= 0) hide(); }, { passive: true });
-    window.addEventListener('mousemove', e => {
-      if (active < 0) return;
-      const r = cursor.getBoundingClientRect();
-      xTo(e.clientX - r.width / 2);
-      yTo(e.clientY - r.height / 2);
-    }, { passive: true });
   }
 
   /* ---------- 6. STICKY STORYTELLING ---------------------- */

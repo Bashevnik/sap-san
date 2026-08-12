@@ -76,9 +76,19 @@
 .intro__stat b { display: block; font-family: var(--display); font-size: clamp(2rem, 3.4vw, 3.2rem); font-weight: 300; line-height: 1; }
 .intro__stat span { display: block; margin-top: .5rem; font-size: var(--fs-small); color: var(--fg-muted); }
 
-/* ---------- 1. EXPERIENCE SELECTOR (hover reveal) --------- */
+/* ---------- 1. EXPERIENCE SELECTOR (side preview) ----------
+   Було: фото бігало за курсором (position:fixed) і при скролі без
+   руху миші лишалося «підвішеним» на екрані поверх тексту пунктів.
+   Стало: фото живе у власній колонці праворуч, завжди в потоці
+   документа — фізично не може перекрити список і не залежить
+   від скролу. Перемикання — кросс-фейд, той самий прийом, що й
+   у мега-меню (js/chrome.js). */
 .exp { position: relative; }
-.exp__list { position: relative; z-index: 2; border-top: 1px solid var(--rule); }
+.exp__layout {
+  display: grid; grid-template-columns: 1.2fr .8fr;
+  gap: clamp(2rem, 5vw, 4rem); align-items: center;
+}
+.exp__list { position: relative; border-top: 1px solid var(--rule); }
 .exp__item { border-bottom: 1px solid var(--rule); }
 .exp__link {
   display: flex; align-items: baseline; gap: clamp(1rem, 3vw, 2.5rem);
@@ -88,7 +98,7 @@
 .exp__n { font-family: var(--display); font-size: .95rem; letter-spacing: .2em; color: var(--accent); flex: none; width: 2.4em; }
 .exp__label {
   font-family: var(--display); font-weight: 300; line-height: 1;
-  font-size: clamp(2rem, 6vw, 5rem); text-transform: uppercase; letter-spacing: 0.01em;
+  font-size: clamp(1.8rem, 4.4vw, 3.6rem); text-transform: uppercase; letter-spacing: 0.01em;
   transition: transform .7s var(--ease), opacity .5s var(--ease);
 }
 .exp__note { margin-left: auto; font-size: var(--fs-small); color: var(--fg-muted); text-align: right; transition: opacity .5s var(--ease); }
@@ -96,22 +106,24 @@
 .exp__list:hover .exp__item:not(:hover) .exp__label { opacity: .35; }
 .exp__item:hover .exp__label { transform: translateX(clamp(.5rem, 1.6vw, 1.6rem)); }
 
-/* Фото, що слідує за курсором */
-.exp__cursor {
-  position: fixed; top: 0; left: 0; z-index: 3;
-  width: clamp(200px, 22vw, 330px); aspect-ratio: 4 / 5;
-  pointer-events: none; opacity: 0; overflow: hidden; border-radius: 2px;
-  will-change: transform, opacity, clip-path;
-  clip-path: inset(50% 0 50% 0);
+/* Панель попереднього перегляду */
+.exp__preview {
+  position: relative; margin: 0; overflow: hidden;
+  aspect-ratio: 4 / 5; border-radius: 2px;
 }
-.exp__cursor img { width: 100%; height: 100%; object-fit: cover; }
-.exp__cursor--on { opacity: 1; clip-path: inset(0 0 0 0); }
+.exp__preview img {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  opacity: 0; transform: scale(1.05);
+  transition: opacity .9s var(--ease), transform 1.3s var(--ease);
+}
+.exp__preview img.is-active { opacity: 1; transform: scale(1); }
 
 /* Мобільний fallback: фото розкривається під назвою по тапу */
 .exp__mobile { display: none; overflow: hidden; height: 0; transition: height .7s var(--ease); }
 .exp__mobile img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; }
-@media (hover: none), (max-width: 780px) {
-  .exp__cursor { display: none; }
+@media (hover: none), (max-width: 900px) {
+  .exp__layout { grid-template-columns: 1fr; }
+  .exp__preview { display: none; }
   .exp__mobile { display: block; }
   .exp__note { display: none; }
   .exp__item.is-open .exp__mobile { height: auto; }
