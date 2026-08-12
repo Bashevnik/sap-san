@@ -329,37 +329,30 @@
     const route = $('#routeBtn');
     if (route) route.href = S.routeLink;
 
-    /* Картки контактів — великий serif замість дрібного списку */
-    const cards = $('#contactCards');
-    if (cards) {
-      cards.innerHTML = `
-        <div class="contactx__card">
-          <b>Телефон</b>
-          <a href="tel:${S.phoneHref}">${S.phone}</a>
-          <small>Щодня ${S.hours.replace('Щодня ', '')}</small>
+    /* Мінімалістичний список: тонкі лінії-розділювачі замість карток у рамках */
+    const list = $('#contactList');
+    if (list) {
+      list.innerHTML = `
+        <div class="contactm__row">
+          <dt>Телефон</dt>
+          <dd><a href="tel:${S.phoneHref}">${S.phone}</a><small>${S.hours}</small></dd>
         </div>
-        <div class="contactx__card">
-          <b>Соцмережі та пошта</b>
-          <a href="${S.instagram}" target="_blank" rel="noopener">${S.instagramLabel}</a>
-          <a href="mailto:${S.email}" style="font-size:clamp(1rem,1.4vw,1.2rem)">${S.email}</a>
+        <div class="contactm__row">
+          <dt>Instagram</dt>
+          <dd><a href="${S.instagram}" target="_blank" rel="noopener">${S.instagramLabel}</a></dd>
         </div>
-        <div class="contactx__card">
-          <b>Адреса</b>
-          <a href="${S.mapLink}" target="_blank" rel="noopener">${S.address}</a>
-          <small>${S.addressFull}</small>
-          <small>Заїзд з ${S.checkIn} · виїзд до ${S.checkOut}</small>
+        <div class="contactm__row">
+          <dt>Email</dt>
+          <dd><a href="mailto:${S.email}">${S.email}</a></dd>
+        </div>
+        <div class="contactm__row">
+          <dt>Адреса</dt>
+          <dd><a href="${S.mapLink}" target="_blank" rel="noopener">${S.address}</a><small>${S.addressFull}</small></dd>
+        </div>
+        <div class="contactm__row">
+          <dt>Заїзд · виїзд</dt>
+          <dd><span>з ${S.checkIn} · до ${S.checkOut}</span></dd>
         </div>`;
-    }
-
-    /* Невелика мозаїка території — щоб сторінка не була голою */
-    const cg = $('#contactGallery');
-    if (cg) {
-      ['houses-water-wide', 'pool-cabanas-wide', 'cabana-lake', 'rattan-chair', 'drink-passion']
-        .forEach(slug => {
-          const fig = document.createElement('figure');
-          fig.innerHTML = D.imgTag(slug, { alt: 'Територія SAP SAN', sizes: '(max-width: 700px) 50vw, 25vw' });
-          cg.appendChild(fig);
-        });
     }
 
     /* Старий вузький блок — лишається сумісним, якщо десь ще використовується */

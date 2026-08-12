@@ -42,25 +42,18 @@
 </section>
 <main id="main">
   <section class="section surface-ivory">
-    <div class="wrap contactx">
+    <div class="wrap contactm">
 
-      <div style="display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(1.5rem,4vw,4rem);align-items:end" data-reveal>
-        <div>
-          <p class="eyebrow">Звʼязок</p>
-          <h2 class="display d1" style="margin-top:.6rem;max-width:12ch">Завжди на звʼязку</h2>
-        </div>
-        <p class="lead">Зателефонуйте або напишіть у Instagram — підкажемо вільні дати,
-          розкажемо про будиночки й підберемо найзручніший маршрут.</p>
+      <div class="contactm__head" data-reveal>
+        <p class="eyebrow">Звʼязок</p>
+        <h2 class="display d1" style="margin-top:.6rem">Завжди на звʼязку</h2>
+        <p class="lead">Зателефонуйте або напишіть у Instagram — підкажемо вільні дати
+          й підберемо найзручніший маршрут.</p>
       </div>
 
-      <div class="contactx__grid" id="contactCards" data-reveal></div>
-
-      <div class="contactx__maprow" data-reveal>
-        <div>
-          <p class="eyebrow">Як дістатися</p>
-          <p class="lead" style="margin-top:.5rem">Бакали, Київська область. Натисніть кнопку — маршрут відкриється у вашому навігаторі.</p>
-        </div>
-        <div style="display:flex;flex-wrap:wrap;gap:.8rem">
+      <div data-reveal>
+        <dl class="contactm__list" id="contactList"></dl>
+        <div class="contactm__actions">
           <a class="btn btn--primary" id="routeBtn" href="#" target="_blank" rel="noopener">Прокласти маршрут
             <svg class="btn__icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2 8h12M9 3l5 5-5 5"/></svg>
           </a>
@@ -68,9 +61,7 @@
         </div>
       </div>
 
-      <div class="contactx__map" id="mapFrame" data-reveal></div>
-
-      <div class="hgal" id="contactGallery" data-reveal></div>
+      <div class="contactm__map" id="mapFrame" data-reveal></div>
     </div>
   </section>
 </main>
