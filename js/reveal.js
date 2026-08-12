@@ -13,7 +13,7 @@
 
   function run() {
     if (!hasGSAP || REDUCED) {
-      $$('.reveal-img img').forEach(i => { i.style.clipPath = 'none'; i.style.transform = 'none'; });
+      $$('.reveal-img img').forEach(i => { i.style.opacity = '1'; i.style.transform = 'none'; });
       return;
     }
     gsap.registerPlugin(ScrollTrigger);
@@ -26,17 +26,17 @@
       });
     });
 
-    /* Cinematic reveal для фотографій у сітках */
+    /* Cinematic reveal для фотографій у сітках — fade + масштаб,
+       без «шторки»: на кадрах зі шторами/лініями clip-path-вайп
+       читався як візуальний глюк. */
     $$('.hgal figure, .ggrid__item, .hcard__media').forEach((box, i) => {
       const img = box.querySelector('img');
       if (!img) return;
-      gsap.set(img, { clipPath: 'inset(0 0 100% 0)', scale: 1.06 });
+      gsap.set(img, { opacity: 0, scale: 1.05 });
       ScrollTrigger.create({
         trigger: box, start: 'top 93%', once: true,
         onEnter() {
-          gsap.timeline({ delay: (i % 3) * 0.06 })
-            .to(img, { clipPath: 'inset(0 0 0% 0)', duration: 1.25, ease: 'power4.inOut' })
-            .to(img, { scale: 1, duration: 1.6, ease: 'power3.out' }, 0);
+          gsap.to(img, { opacity: 1, scale: 1, duration: 1.35, ease: 'power3.out', delay: (i % 3) * 0.06 });
         }
       });
     });
@@ -45,13 +45,11 @@
     $$('.reveal-img').forEach(box => {
       const img = box.querySelector('img');
       if (!img) return;
-      gsap.set(img, { clipPath: 'inset(0 0 100% 0)', scale: 1.06 });
+      gsap.set(img, { opacity: 0, scale: 1.05 });
       ScrollTrigger.create({
         trigger: box, start: 'top 88%', once: true,
         onEnter() {
-          gsap.timeline()
-            .to(img, { clipPath: 'inset(0 0 0% 0)', duration: 1.4, ease: 'power4.inOut' })
-            .to(img, { scale: 1, duration: 1.8, ease: 'power3.out' }, 0);
+          gsap.to(img, { opacity: 1, scale: 1, duration: 1.6, ease: 'power3.out' });
         }
       });
     });

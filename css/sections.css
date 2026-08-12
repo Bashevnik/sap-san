@@ -46,11 +46,15 @@
 .hero__scroll i { display: block; width: 46px; height: 1px; background: currentColor; transform-origin: left; animation: scrollcue 2.6s var(--ease-io) infinite; }
 @keyframes scrollcue { 0%,100% { transform: scaleX(.3); } 50% { transform: scaleX(1); } }
 
-/* ---------- REVEAL (cinematic mask) ----------------------- */
-/* Базовий стан — JS/GSAP анімує до відкритого. */
+/* ---------- REVEAL (fade + scale) --------------------------
+   Раніше фото «розкривалось» шторкою (clip-path зверху вниз) —
+   на композиціях зі шторами/вертикальними лініями це читалося
+   як візуальний глюк (лінія ніби ріже кадр навпіл). Замінено на
+   м'який fade+scale: фото просто проявляється й трохи наближується,
+   без напрямленого «розрізу». Спокійніше, преміальніше. */
 .reveal-img { overflow: hidden; position: relative; }
 .reveal-img img { width: 100%; height: 100%; object-fit: cover; }
-.js .reveal-img > img, .js .reveal-img > picture { clip-path: inset(0 0 100% 0); transform: scale(1.08); will-change: clip-path, transform; }
+.js .reveal-img > img, .js .reveal-img > picture { opacity: 0; transform: scale(1.05); will-change: opacity, transform; }
 .js .split-line { display: block; overflow: hidden; }
 .js .split-line > span { display: block; }
 
@@ -62,6 +66,11 @@
 .intro__note { grid-column: 3 / 7; margin-top: clamp(2rem, 5vh, 3.5rem); }
 .intro__figure { grid-column: 9 / 13; margin-top: clamp(2rem, 8vh, 6rem); }
 .intro__figure .reveal-img { aspect-ratio: 3 / 4; }
+/* Кадр вертикальний: цікава частина (шатро, парасоля, озеро) —
+   у верхній третині, низ — порожня плитка тераси. За замовчуванням
+   object-fit:cover ріже по центру й показує саме плитку та обрізаний
+   стовп — виправляємо зсувом точки фокусу вгору. */
+.intro__figure .reveal-img img { object-position: 50% 20%; }
 .intro__cap { margin-top: .9rem; font-size: var(--fs-small); color: var(--fg-muted); }
 .intro__stats { grid-column: 1 / 13; margin-top: clamp(3rem, 8vh, 6rem); display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 2rem; border-top: 1px solid var(--rule); padding-top: 2rem; }
 .intro__stat b { display: block; font-family: var(--display); font-size: clamp(2rem, 3.4vw, 3.2rem); font-weight: 300; line-height: 1; }
@@ -406,7 +415,7 @@
     animation-duration: .01ms !important; animation-iteration-count: 1 !important;
     transition-duration: .01ms !important;
   }
-  .js .reveal-img > img, .js .reveal-img > picture { clip-path: none !important; transform: none !important; }
+  .js .reveal-img > img, .js .reveal-img > picture { opacity: 1 !important; transform: none !important; }
   .chapters__sticky { position: static; height: auto; }
   .chapters__step { min-height: auto; opacity: 1; }
 }
