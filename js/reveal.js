@@ -30,13 +30,48 @@
     $$('.hgal figure, .ggrid__item, .hcard__media').forEach((box, i) => {
       const img = box.querySelector('img');
       if (!img) return;
-      gsap.set(img, { clipPath: 'inset(0 0 100% 0)', scale: 1.1 });
+      gsap.set(img, { clipPath: 'inset(0 0 100% 0)', scale: 1.06 });
       ScrollTrigger.create({
         trigger: box, start: 'top 93%', once: true,
         onEnter() {
           gsap.timeline({ delay: (i % 3) * 0.06 })
             .to(img, { clipPath: 'inset(0 0 0% 0)', duration: 1.25, ease: 'power4.inOut' })
             .to(img, { scale: 1, duration: 1.6, ease: 'power3.out' }, 0);
+        }
+      });
+    });
+
+    /* Cinematic reveal для окремих великих кадрів (.reveal-img) */
+    $$('.reveal-img').forEach(box => {
+      const img = box.querySelector('img');
+      if (!img) return;
+      gsap.set(img, { clipPath: 'inset(0 0 100% 0)', scale: 1.06 });
+      ScrollTrigger.create({
+        trigger: box, start: 'top 88%', once: true,
+        onEnter() {
+          gsap.timeline()
+            .to(img, { clipPath: 'inset(0 0 0% 0)', duration: 1.4, ease: 'power4.inOut' })
+            .to(img, { scale: 1, duration: 1.8, ease: 'power3.out' }, 0);
+        }
+      });
+    });
+
+    /* Природний мотив — гілка з листям промальовується під час скролу.
+       Кожен <path> має власну довжину, тому листя «розкриваються»
+       трохи пізніше за саму лінію — ефект живого малюнка, а не
+       статичної іконки. */
+    $$('svg[data-natureline]').forEach(svg => {
+      const paths = $$('path', svg);
+      if (!paths.length) return;
+      paths.forEach(p => {
+        const len = p.getTotalLength();
+        p.style.strokeDasharray = len;
+        p.style.strokeDashoffset = len;
+      });
+      ScrollTrigger.create({
+        trigger: svg, start: 'top 90%', once: true,
+        onEnter() {
+          gsap.to(paths, { strokeDashoffset: 0, duration: 1.6, ease: 'power2.out', stagger: 0.22 });
         }
       });
     });

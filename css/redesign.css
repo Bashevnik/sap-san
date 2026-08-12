@@ -216,6 +216,46 @@
   .contactm__map { aspect-ratio: 4 / 3; order: -1; }
 }
 
+/* ---------- Природний мотив: гілка з листям, що промальовується ----
+   Одна декоративна лінія, що «оживає» під час скролу — саме те, що
+   робить мінімалістичну сторінку теплою, а не порожньою. Малюється
+   через stroke-dasharray у reveal.js, тому в розмітці лінія завжди
+   присутня повністю — без анімації просто видно готовий контур. */
+.natureline {
+  display: block; overflow: visible;
+  color: var(--accent); fill: none; stroke: currentColor;
+  stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;
+}
+.natureline--head {
+  position: absolute; right: -1rem; bottom: -2.2rem;
+  width: clamp(220px, 30vw, 380px); height: auto;
+  opacity: .55; pointer-events: none;
+}
+.contactm__head { position: relative; padding-bottom: clamp(2rem, 6vh, 3.5rem); }
+
+.contactm__divider {
+  grid-column: 1 / -1; display: flex; justify-content: center;
+  padding-top: clamp(1rem, 4vh, 2rem);
+}
+.natureline--divider { width: min(420px, 70vw); opacity: .4; }
+
+@media (max-width: 860px) {
+  .natureline--head { position: static; width: min(280px, 70vw); margin-top: 1.5rem; opacity: .5; }
+  .contactm__head { padding-bottom: 0; }
+}
+
+/* ---------- Природна сцена між контактами і фінальним CTA -------- */
+.contactm__scene { position: relative; }
+.contactm__scene-img { aspect-ratio: 21 / 9; min-height: 320px; }
+.contactm__scene-img img { width: 100%; height: 100%; object-fit: cover; }
+.contactm__scene-cap {
+  position: absolute; left: var(--gutter); bottom: 1.4rem; z-index: 1;
+  font-family: var(--display); font-style: italic; font-weight: 300;
+  font-size: clamp(1.1rem, 2vw, 1.6rem); color: #fff;
+  text-shadow: 0 2px 16px rgba(10,12,10,.55); max-width: 26ch;
+}
+@media (max-width: 700px) { .contactm__scene-img { aspect-ratio: 4 / 5; } }
+
 /* ============================================================
    5. СТОРІНКА БАСЕЙНУ — прибрати порожню колонку
    ============================================================ */

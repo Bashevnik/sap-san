@@ -133,7 +133,7 @@
     $$('.reveal-img').forEach(box => {
       const img = $('img', box);
       if (!img) return;
-      gsap.set(img, { clipPath: 'inset(0 0 100% 0)', scale: 1.14 });
+      gsap.set(img, { clipPath: 'inset(0 0 100% 0)', scale: 1.08 });
       ScrollTrigger.create({
         trigger: box, start: 'top 86%', once: true,
         onEnter() {
@@ -304,7 +304,7 @@
     if (!hasGSAP || REDUCED) return;
     $$('.gmasonry__item', box).forEach((item, i) => {
       const img = $('img', item);
-      gsap.set(img, { clipPath: 'inset(0 0 100% 0)', scale: 1.1 });
+      gsap.set(img, { clipPath: 'inset(0 0 100% 0)', scale: 1.06 });
       ScrollTrigger.create({
         trigger: item, start: 'top 94%', once: true,
         onEnter() {
