@@ -276,7 +276,7 @@
      Якщо API недоступне або відповідає повільно — лишається
      вбудований контент. Сайт не має падати через бекенд.
      ============================================================ */
-  const CFG = global.SAPSAN_CONFIG || {};
+  const CFG = global.SAPSAN_CONFIG || { apiBase: 'https://sapsanbot.vercel.app/api', cacheTtl: 60, timeoutMs: 4000 };
 
   function fetchContent() {
     if (!CFG.apiBase) return Promise.resolve(null);
