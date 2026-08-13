@@ -1,226 +1,143 @@
-<!doctype html>
-<html lang="uk">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Бронювання — SAP SAN Resort &amp; Retreat</title>
-<meta name="description" content="Залиште заявку на бронювання будиночка A-frame або шезлонгів біля басейну SAP SAN. Працівник звʼяжеться з вами для перевірки доступності та підтвердження.">
-<link rel="canonical" href="https://sapsan-resort.com.ua/booking.html">
-<meta name="theme-color" content="#15140F">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="SAP SAN Resort &amp; Retreat">
-<meta property="og:title" content="Бронювання — SAP SAN">
-<meta property="og:description" content="Заявка на будиночок або шезлонги біля басейну.">
-<meta property="og:locale" content="uk_UA">
-<meta property="og:image" content="images/pool-cabanas-wide-1200.webp">
+const REDIS_URL = process.env.UPSTASH_REDIS_REST_URL;
+const REDIS_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 
-<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/sections.css">
-<link rel="stylesheet" href="css/pages.css">
-<link rel="stylesheet" href="css/redesign.css">
-<script>document.documentElement.classList.add('js');</script>
-</head>
-<body>
-<a class="skip-link" href="#main">Перейти до вмісту</a>
-<header class="header is-solid" id="header"></header>
-<div class="menu" id="menu" aria-hidden="true" tabindex="-1"></div>
+async function cmd(...args) {
+  const res = await fetch(REDIS_URL, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${REDIS_TOKEN}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(args),
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(`Redis error: ${data.error}`);
+  return data.result;
+}
 
-<main id="main" class="section booking surface-ivory">
-  <div class="wrap">
-    <nav class="crumbs" aria-label="Хлібні крихти" style="color:var(--fg-muted)">
-      <a href="index.html">Головна</a><span>/</span><span aria-current="page">Бронювання</span>
-    </nav>
+// Upstash HGETALL повертає плоский масив ["k","v","k","v"...]
+// Конвертуємо в об'єкт {k:v}
+function toObject(arr) {
+  if (!arr) return null;
+  if (!Array.isArray(arr)) return Object.keys(arr).length ? arr : null;
+  if (arr.length === 0) return null;
+  const obj = {};
+  for (let i = 0; i < arr.length; i += 2) obj[arr[i]] = arr[i + 1];
+  return obj;
+}
 
-    <p class="eyebrow" style="margin-top:1rem">Бронювання</p>
-    <h1 class="display d1" style="max-width:14ch;margin-top:.6rem">Залиште заявку</h1>
-    <p class="lead" style="margin-top:1.2rem;max-width:54ch">
-      Ми перевіримо доступність дат і зателефонуємо для підтвердження.
-      Заїзд з 14:00, виїзд до 12:00. Для фіксації дати потрібна передоплата.
-    </p>
+async function pipeline(commands) {
+  const res = await fetch(`${REDIS_URL}/pipeline`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${REDIS_TOKEN}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(commands),
+  });
+  const data = await res.json();
+  return data.map(r => r.result);
+}
 
-    <div class="booking__tabs" role="tablist" aria-label="Тип заявки" style="margin-top:clamp(2rem,5vh,3rem)">
-      <button class="booking__tab" id="tab-house" role="tab" aria-selected="true" aria-controls="panel-house">Будиночок</button>
-      <button class="booking__tab" id="tab-sunbeds" role="tab" aria-selected="false" aria-controls="panel-sunbeds">Шезлонги</button>
-    </div>
+async function createBooking(data) {
+  const id = await cmd('INCR', 'counter:booking');
+  const booking = { ...data, id: String(id), status: 'pending', createdAt: String(Date.now()) };
+  const flat = Object.entries(booking).flat();
+  await pipeline([
+    ['HSET', `booking:${id}`, ...flat],
+    ['ZADD', 'bookings:all', String(Date.now()), String(id)],
+    ['SADD', 'bookings:pending', String(id)],
+  ]);
+  return booking;
+}
 
-    <!-- ============ ФОРМА: БУДИНОЧОК ============ -->
-    <section class="booking__panel" id="panel-house" role="tabpanel" aria-labelledby="tab-house">
-      <form class="form" id="formHouse" novalidate>
-        <div class="field">
-          <label for="h-in">Дата заїзду *</label>
-          <input type="date" id="h-in" name="checkin" required>
-          <span class="field__err" data-err></span>
-        </div>
-        <div class="field">
-          <label for="h-out">Дата виїзду *</label>
-          <input type="date" id="h-out" name="checkout" required>
-          <span class="field__err" data-err></span>
-        </div>
-        <div class="field">
-          <label for="h-house">Будиночок</label>
-          <select id="h-house" name="house"></select>
-          <span class="field__err" data-err></span>
-        </div>
-        <div class="field">
-          <label for="h-adults">Дорослі *</label>
-          <select id="h-adults" name="adults" required>
-            <option value="1">1</option><option value="2" selected>2</option>
-            <option value="3">3</option><option value="4">4</option>
-            <option value="5">5</option><option value="6">6</option>
-            <option value="7">7</option><option value="8">8</option>
-            <option value="9">9</option><option value="10">10</option>
-          </select>
-          <span class="field__err" data-err></span>
-        </div>
-        <div class="field">
-          <label for="h-kids">Діти</label>
-          <select id="h-kids" name="children">
-            <option value="0" selected>0</option><option value="1">1</option>
-            <option value="2">2</option><option value="3">3</option>
-            <option value="4">4</option><option value="5">5</option>
-            <option value="6">6</option><option value="7">7</option>
-            <option value="8">8</option><option value="9">9</option>
-            <option value="10">10</option>
-          </select>
-          <span class="field__err" data-err></span>
-        </div>
-        <div class="field">
-          <label for="h-name">Імʼя *</label>
-          <input type="text" id="h-name" name="name" autocomplete="name" required>
-          <span class="field__err" data-err></span>
-        </div>
-        <div class="field">
-          <label for="h-phone">Телефон *</label>
-          <input type="tel" id="h-phone" name="phone" autocomplete="tel" placeholder="+380 __ ___ __ __" required>
-          <span class="field__err" data-err></span>
-        </div>
-        <div class="field field--full">
-          <label for="h-comment">Коментар</label>
-          <textarea id="h-comment" name="comment" rows="3"></textarea>
-          <span class="field__err" data-err></span>
-        </div>
+async function getBooking(id) {
+  return toObject(await cmd('HGETALL', `booking:${id}`));
+}
 
-        <!-- пастка для ботів: люди цього поля не бачать -->
-        <div class="hp" aria-hidden="true">
-          <label for="h-company">Компанія</label>
-          <input type="text" id="h-company" name="company" data-trap tabindex="-1" autocomplete="off">
-        </div>
+async function updateBookingStatus(id, status) {
+  const booking = await getBooking(id);
+  if (!booking) return null;
+  await pipeline([
+    ['SREM', `bookings:${booking.status}`, String(id)],
+    ['SADD', `bookings:${status}`, String(id)],
+    ['HSET', `booking:${id}`, 'status', status, 'updatedAt', String(Date.now())],
+  ]);
+  return { ...booking, status };
+}
 
-        <div class="form__foot">
-          <p class="form__note">Відправлення заявки не означає автоматичного підтвердження бронювання.</p>
-          <button class="btn btn--primary" type="submit">Надіслати заявку
-            <svg class="btn__icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2 8h12M9 3l5 5-5 5"/></svg>
-          </button>
-        </div>
+async function getBookingsByStatus(status) {
+  const ids = await cmd('SMEMBERS', `bookings:${status}`);
+  if (!ids || !ids.length) return [];
+  const bookings = await Promise.all(ids.map(id => getBooking(id)));
+  return bookings.filter(Boolean).sort((a, b) => Number(b.createdAt) - Number(a.createdAt));
+}
 
-        <div class="booking__success" id="successHouse" role="status">
-          <p class="eyebrow">Заявку отримано</p>
-          <p class="display d3">Дякуємо! Заявку отримано. Працівник SapSan звʼяжеться з вами для перевірки доступності та підтвердження бронювання.</p>
-          <p class="small muted">Відправлення заявки не означає автоматичного підтвердження бронювання.</p>
-        </div>
-      </form>
-    </section>
+async function getAllBookings() {
+  const ids = await cmd('ZRANGE', 'bookings:all', '0', '-1', 'REV');
+  if (!ids || !ids.length) return [];
+  const bookings = await Promise.all(ids.map(id => getBooking(id)));
+  return bookings.filter(Boolean);
+}
 
-    <!-- ============ ФОРМА: ШЕЗЛОНГИ ============ -->
-    <section class="booking__panel" id="panel-sunbeds" role="tabpanel" aria-labelledby="tab-sunbeds" hidden>
-      <form class="form" id="formSunbeds" novalidate>
-        <div class="field">
-          <label for="s-date">Дата відвідування *</label>
-          <input type="date" id="s-date" name="date" required>
-          <span class="field__err" data-err></span>
-        </div>
-        <div class="field">
-          <label for="s-count">Кількість шезлонгів *</label>
-          <select id="s-count" name="sunbeds" required>
-            <option value="1">1</option><option value="2" selected>2</option>
-            <option value="3">3</option><option value="4">4</option>
-            <option value="5">5</option><option value="6">6</option>
-            <option value="7">7</option><option value="8">8</option>
-          </select>
-          <span class="field__err" data-err></span>
-        </div>
-        <div class="field">
-          <label for="s-adults">Дорослі *</label>
-          <select id="s-adults" name="adults" required>
-            <option value="1">1</option><option value="2" selected>2</option>
-            <option value="3">3</option><option value="4">4</option>
-            <option value="5">5</option><option value="6">6</option>
-            <option value="7">7</option><option value="8">8</option>
-            <option value="9">9</option><option value="10">10</option>
-          </select>
-          <span class="field__err" data-err></span>
-        </div>
-        <div class="field">
-          <label for="s-kids">Діти</label>
-          <select id="s-kids" name="children">
-            <option value="0" selected>0</option><option value="1">1</option>
-            <option value="2">2</option><option value="3">3</option>
-            <option value="4">4</option><option value="5">5</option>
-            <option value="6">6</option><option value="7">7</option>
-            <option value="8">8</option><option value="9">9</option>
-            <option value="10">10</option>
-          </select>
-          <span class="field__err" data-err></span>
-        </div>
-        <div class="field">
-          <label for="s-name">Імʼя *</label>
-          <input type="text" id="s-name" name="name" autocomplete="name" required>
-          <span class="field__err" data-err></span>
-        </div>
-        <div class="field">
-          <label for="s-phone">Телефон *</label>
-          <input type="tel" id="s-phone" name="phone" autocomplete="tel" placeholder="+380 __ ___ __ __" required>
-          <span class="field__err" data-err></span>
-        </div>
-        <div class="field field--full">
-          <label for="s-comment">Коментар</label>
-          <textarea id="s-comment" name="comment" rows="3"></textarea>
-          <span class="field__err" data-err></span>
-        </div>
+async function createProperty(data) {
+  const id = await cmd('INCR', 'counter:property');
+  const property = { ...data, id: String(id), isActive: 'true', createdAt: String(Date.now()) };
+  const flat = Object.entries(property).flat();
+  await pipeline([
+    ['HSET', `property:${id}`, ...flat],
+    ['ZADD', 'properties:list', String(id), String(id)],
+  ]);
+  return property;
+}
 
-        <div class="hp" aria-hidden="true">
-          <label for="s-company">Компанія</label>
-          <input type="text" id="s-company" name="company" data-trap tabindex="-1" autocomplete="off">
-        </div>
+async function getProperty(id) {
+  return toObject(await cmd('HGETALL', `property:${id}`));
+}
 
-        <div class="form__foot">
-          <p class="form__note">Діти до 5 років — безкоштовно. У вартість квитка входить шезлонг, парасолька та роздягальня.</p>
-          <button class="btn btn--primary" type="submit">Надіслати заявку
-            <svg class="btn__icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2 8h12M9 3l5 5-5 5"/></svg>
-          </button>
-        </div>
+async function getAllProperties() {
+  const ids = await cmd('ZRANGE', 'properties:list', '0', '-1');
+  if (!ids || !ids.length) return [];
+  const props = await Promise.all(ids.map(id => getProperty(id)));
+  return props.filter(Boolean);
+}
 
-        <div class="booking__success" id="successSunbeds" role="status">
-          <p class="eyebrow">Заявку отримано</p>
-          <p class="display d3">Дякуємо! Заявку отримано. Працівник SapSan звʼяжеться з вами для перевірки доступності та підтвердження бронювання.</p>
-          <p class="small muted">Відправлення заявки не означає автоматичного підтвердження бронювання.</p>
-        </div>
-      </form>
-    </section>
+async function updateProperty(id, data) {
+  const flat = Object.entries({ ...data, updatedAt: String(Date.now()) }).flat();
+  await cmd('HSET', `property:${id}`, ...flat);
+  return getProperty(id);
+}
 
-    <hr class="rule" style="margin-block:clamp(3rem,8vh,5rem)">
+async function deleteProperty(id) {
+  await pipeline([['DEL', `property:${id}`], ['ZREM', 'properties:list', String(id)]]);
+}
 
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:2rem">
-      <div><p class="eyebrow">Будиночок · будні</p><p class="display d3" style="margin-top:.4rem">4 000 грн</p></div>
-      <div><p class="eyebrow">Будиночок · вихідні</p><p class="display d3" style="margin-top:.4rem">6 000 грн</p></div>
-      <div><p class="eyebrow">Басейн · Пн–Чт</p><p class="display d3" style="margin-top:.4rem">800 грн</p></div>
-      <div><p class="eyebrow">Басейн · Пт–Нд</p><p class="display d3" style="margin-top:.4rem">900 грн</p></div>
-      <div><p class="eyebrow">Басейн · вечір</p><p class="display d3" style="margin-top:.4rem">700 грн</p></div>
-      <div><p class="eyebrow">Телефон</p><p class="display d3" style="margin-top:.4rem"><a href="tel:+380980938099">098 093 80 99</a></p></div>
-    </div>
-  </div>
-</main>
+async function getSettings() {
+  return toObject(await cmd('HGETALL', 'settings')) || {};
+}
 
-<footer class="footer surface-ink" id="footer"></footer>
+async function updateSettings(data) {
+  await cmd('HSET', 'settings', ...Object.entries(data).flat());
+}
 
-<script src="js/config.js" defer></script>
-<script src="js/images.js" defer></script>
-<script src="js/data.js" defer></script>
-<script src="js/chrome.js" defer></script>
-<script src="js/booking.js" defer></script>
-</body>
-</html>
+async function getPoolSettings() {
+  return toObject(await cmd('HGETALL', 'pool')) || {};
+}
+
+async function updatePoolSettings(data) {
+  await cmd('HSET', 'pool', ...Object.entries(data).flat());
+}
+
+async function getBotState(chatId) {
+  const raw = await cmd('GET', `bot_state:${chatId}`);
+  return raw ? JSON.parse(raw) : { step: 'idle', data: {} };
+}
+
+async function setBotState(chatId, state) {
+  await cmd('SET', `bot_state:${chatId}`, JSON.stringify(state), 'EX', '3600');
+}
+
+async function clearBotState(chatId) {
+  await cmd('DEL', `bot_state:${chatId}`);
+}
+
+module.exports = {
+  createBooking, getBooking, updateBookingStatus, getBookingsByStatus, getAllBookings,
+  createProperty, getProperty, getAllProperties, updateProperty, deleteProperty,
+  getSettings, updateSettings, getPoolSettings, updatePoolSettings,
+  getBotState, setBotState, clearBotState,
+};
