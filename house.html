@@ -1,86 +1,143 @@
-<!doctype html>
-<html lang="uk">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Будиночок — SAP SAN Resort &amp; Retreat</title>
-<meta name="description" content="Будиночок A-frame у SAP SAN: фото, опис, зручності, кількість гостей, ціни та правила заїзду.">
-<link rel="canonical" href="https://sapsan-resort.com.ua/house.html">
-<meta name="theme-color" content="#15140F">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="SAP SAN Resort &amp; Retreat">
-<meta property="og:title" content="Будиночок — SAP SAN Resort &amp; Retreat">
-<meta property="og:description" content="Будиночок A-frame у SAP SAN: фото, опис, зручності, кількість гостей, ціни та правила заїзду.">
-<meta property="og:locale" content="uk_UA">
-<meta property="og:image" content="images/houses-water-wide-1170.webp">
-<meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/sections.css">
-<link rel="stylesheet" href="css/pages.css">
-<link rel="stylesheet" href="css/redesign.css">
-<script>document.documentElement.classList.add('js');</script>
-</head>
-<body>
-<a class="skip-link" href="#main">Перейти до вмісту</a>
-<header class="header" id="header"></header>
-<div class="menu" id="menu" aria-hidden="true"></div>
+const REDIS_URL = process.env.UPSTASH_REDIS_REST_URL;
+const REDIS_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 
-<section class="page-hero">
-  <div class="page-hero__media" id="houseHero"></div>
-  <div class="page-hero__body wrap">
-    <nav class="crumbs" aria-label="Хлібні крихти">
-      <a href="index.html">Головна</a><span>/</span>
-      <a href="houses.html">Будиночки</a><span>/</span>
-      <span id="houseKicker" aria-current="page"></span>
-    </nav>
-    <h1 id="houseTitle" style="margin-top:1rem"></h1>
-    <p class="lead" id="houseLead"></p>
-  </div>
-</section>
+async function cmd(...args) {
+  const res = await fetch(REDIS_URL, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${REDIS_TOKEN}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(args),
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(`Redis error: ${data.error}`);
+  return data.result;
+}
 
-<main id="main">
-  <section class="section surface-ivory">
-    <div class="wrap hdetail" id="houseDetail"></div>
-  </section>
+// Upstash HGETALL повертає плоский масив ["k","v","k","v"...]
+// Конвертуємо в об'єкт {k:v}
+function toObject(arr) {
+  if (!arr) return null;
+  if (!Array.isArray(arr)) return Object.keys(arr).length ? arr : null;
+  if (arr.length === 0) return null;
+  const obj = {};
+  for (let i = 0; i < arr.length; i += 2) obj[arr[i]] = arr[i + 1];
+  return obj;
+}
 
-  <section class="section surface-sand-2">
-    <div class="wrap">
-      <p class="eyebrow" data-reveal>Фотографії</p>
-      <h2 class="display d2" data-reveal style="margin:.6rem 0 clamp(1.5rem,4vh,2.5rem)">Як це виглядає</h2>
-      <div class="hgal" id="houseGallery"></div>
-    </div>
-  </section>
+async function pipeline(commands) {
+  const res = await fetch(`${REDIS_URL}/pipeline`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${REDIS_TOKEN}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(commands),
+  });
+  const data = await res.json();
+  return data.map(r => r.result);
+}
 
-  <section class="section surface-ivory">
-    <div class="wrap">
-      <p class="eyebrow" data-reveal>Інші будиночки</p>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:clamp(1rem,2.5vw,2rem);margin-top:1.5rem" id="otherHouses"></div>
-    </div>
-  </section>
-</main>
-<section class="section section--tight surface-ink">
-  <div class="wrap ctabar">
-    <div class="ctabar__text">
-      <h2 class="display d2">Забронювати цей будиночок</h2>
-      <p class="lead" style="margin-top:.8rem">Ми перевіримо доступність дат і зателефонуємо для підтвердження.</p>
-    </div>
-    <div class="ctabar__actions">
-      <a class="btn btn--primary" href="booking.html?type=house">Залишити заявку</a>
-      <a class="btn btn--ghost" href="houses.html">Усі будиночки</a>
-    </div>
-  </div>
-</section>
-<footer class="footer surface-ink" id="footer"></footer>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
-<script src="js/images.js" defer></script>
-<script src="js/data.js" defer></script>
-<script src="js/chrome.js" defer></script>
-<script src="js/pages.js" defer></script>
-<script src="js/reveal.js" defer></script>
-</body>
-</html>
+async function createBooking(data) {
+  const id = await cmd('INCR', 'counter:booking');
+  const booking = { ...data, id: String(id), status: 'pending', createdAt: String(Date.now()) };
+  const flat = Object.entries(booking).flat();
+  await pipeline([
+    ['HSET', `booking:${id}`, ...flat],
+    ['ZADD', 'bookings:all', String(Date.now()), String(id)],
+    ['SADD', 'bookings:pending', String(id)],
+  ]);
+  return booking;
+}
+
+async function getBooking(id) {
+  return toObject(await cmd('HGETALL', `booking:${id}`));
+}
+
+async function updateBookingStatus(id, status) {
+  const booking = await getBooking(id);
+  if (!booking) return null;
+  await pipeline([
+    ['SREM', `bookings:${booking.status}`, String(id)],
+    ['SADD', `bookings:${status}`, String(id)],
+    ['HSET', `booking:${id}`, 'status', status, 'updatedAt', String(Date.now())],
+  ]);
+  return { ...booking, status };
+}
+
+async function getBookingsByStatus(status) {
+  const ids = await cmd('SMEMBERS', `bookings:${status}`);
+  if (!ids || !ids.length) return [];
+  const bookings = await Promise.all(ids.map(id => getBooking(id)));
+  return bookings.filter(Boolean).sort((a, b) => Number(b.createdAt) - Number(a.createdAt));
+}
+
+async function getAllBookings() {
+  const ids = await cmd('ZRANGE', 'bookings:all', '0', '-1', 'REV');
+  if (!ids || !ids.length) return [];
+  const bookings = await Promise.all(ids.map(id => getBooking(id)));
+  return bookings.filter(Boolean);
+}
+
+async function createProperty(data) {
+  const id = await cmd('INCR', 'counter:property');
+  const property = { ...data, id: String(id), isActive: 'true', createdAt: String(Date.now()) };
+  const flat = Object.entries(property).flat();
+  await pipeline([
+    ['HSET', `property:${id}`, ...flat],
+    ['ZADD', 'properties:list', String(id), String(id)],
+  ]);
+  return property;
+}
+
+async function getProperty(id) {
+  return toObject(await cmd('HGETALL', `property:${id}`));
+}
+
+async function getAllProperties() {
+  const ids = await cmd('ZRANGE', 'properties:list', '0', '-1');
+  if (!ids || !ids.length) return [];
+  const props = await Promise.all(ids.map(id => getProperty(id)));
+  return props.filter(Boolean);
+}
+
+async function updateProperty(id, data) {
+  const flat = Object.entries({ ...data, updatedAt: String(Date.now()) }).flat();
+  await cmd('HSET', `property:${id}`, ...flat);
+  return getProperty(id);
+}
+
+async function deleteProperty(id) {
+  await pipeline([['DEL', `property:${id}`], ['ZREM', 'properties:list', String(id)]]);
+}
+
+async function getSettings() {
+  return toObject(await cmd('HGETALL', 'settings')) || {};
+}
+
+async function updateSettings(data) {
+  await cmd('HSET', 'settings', ...Object.entries(data).flat());
+}
+
+async function getPoolSettings() {
+  return toObject(await cmd('HGETALL', 'pool')) || {};
+}
+
+async function updatePoolSettings(data) {
+  await cmd('HSET', 'pool', ...Object.entries(data).flat());
+}
+
+async function getBotState(chatId) {
+  const raw = await cmd('GET', `bot_state:${chatId}`);
+  return raw ? JSON.parse(raw) : { step: 'idle', data: {} };
+}
+
+async function setBotState(chatId, state) {
+  await cmd('SET', `bot_state:${chatId}`, JSON.stringify(state), 'EX', '3600');
+}
+
+async function clearBotState(chatId) {
+  await cmd('DEL', `bot_state:${chatId}`);
+}
+
+module.exports = {
+  createBooking, getBooking, updateBookingStatus, getBookingsByStatus, getAllBookings,
+  createProperty, getProperty, getAllProperties, updateProperty, deleteProperty,
+  getSettings, updateSettings, getPoolSettings, updatePoolSettings,
+  getBotState, setBotState, clearBotState,
+};
