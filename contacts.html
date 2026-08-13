@@ -1,110 +1,143 @@
-<!doctype html>
-<html lang="uk">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Контакти та як дістатися — SAP SAN Resort &amp; Retreat</title>
-<meta name="description" content="Контакти SAP SAN: телефон, Instagram, email, адреса в Бакалах Київської області, графік роботи та маршрут на Google Картах.">
-<link rel="canonical" href="https://sapsan-resort.com.ua/contacts.html">
-<meta name="theme-color" content="#15140F">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="SAP SAN Resort &amp; Retreat">
-<meta property="og:title" content="Контакти та як дістатися — SAP SAN Resort &amp; Retreat">
-<meta property="og:description" content="Контакти SAP SAN: телефон, Instagram, email, адреса в Бакалах Київської області, графік роботи та маршрут на Google Картах.">
-<meta property="og:locale" content="uk_UA">
-<meta property="og:image" content="images/houses-water-wide-2-1170.webp">
-<meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/sections.css">
-<link rel="stylesheet" href="css/pages.css">
-<link rel="stylesheet" href="css/redesign.css">
-<script>document.documentElement.classList.add('js');</script>
-</head>
-<body>
-<a class="skip-link" href="#main">Перейти до вмісту</a>
-<header class="header" id="header"></header>
-<div class="menu" id="menu" aria-hidden="true"></div>
+const REDIS_URL = process.env.UPSTASH_REDIS_REST_URL;
+const REDIS_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 
-<section class="page-hero">
-  <div class="page-hero__media">
-    <img src="images/pool-cabanas-wide-1200.webp" srcset="images/pool-cabanas-wide-640.webp 640w, images/pool-cabanas-wide-1000.webp 1000w, images/pool-cabanas-wide-1200.webp 1200w" sizes="100vw" width="1200" height="1600" fetchpriority="high" decoding="async" alt="Територія SAP SAN біля води">
-  </div>
-  <div class="page-hero__body wrap">
-    <nav class="crumbs" aria-label="Хлібні крихти"><a href="index.html">Головна</a><span>/</span><span aria-current="page">Контакти</span></nav>
-    <p class="eyebrow" style="margin-top:1rem;color:var(--gold-soft)">Контакти</p>
-    <h1>Як нас знайти</h1>
-    <p class="lead">Бакали, Київська область. Щодня з 10:00 до 22:00.</p>
-  </div>
-</section>
-<main id="main">
-  <section class="section surface-ivory">
-    <div class="wrap contactm">
+async function cmd(...args) {
+  const res = await fetch(REDIS_URL, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${REDIS_TOKEN}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(args),
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(`Redis error: ${data.error}`);
+  return data.result;
+}
 
-      <div class="contactm__head" data-reveal>
-        <p class="eyebrow">Звʼязок</p>
-        <h2 class="display d1" style="margin-top:.6rem">Завжди на звʼязку</h2>
-        <p class="lead">Зателефонуйте або напишіть у Instagram — підкажемо вільні дати
-          й підберемо найзручніший маршрут.</p>
-        <svg class="natureline natureline--head" viewBox="0 0 460 140" aria-hidden="true" data-natureline>
-          <path d="M0,90 C60,60 100,110 160,85 C220,60 260,110 320,85 C380,60 420,100 460,80"/>
-          <path d="M100,88 C114,78 113,60 96,50 C79,60 78,78 100,88 Z"/>
-          <path d="M240,88 C254,78 253,60 236,50 C219,60 218,78 240,88 Z"/>
-          <path d="M380,84 C394,74 393,56 376,46 C359,56 358,74 380,84 Z"/>
-        </svg>
-      </div>
+// Upstash HGETALL повертає плоский масив ["k","v","k","v"...]
+// Конвертуємо в об'єкт {k:v}
+function toObject(arr) {
+  if (!arr) return null;
+  if (!Array.isArray(arr)) return Object.keys(arr).length ? arr : null;
+  if (arr.length === 0) return null;
+  const obj = {};
+  for (let i = 0; i < arr.length; i += 2) obj[arr[i]] = arr[i + 1];
+  return obj;
+}
 
-      <div class="contactm__split">
-        <figure class="reveal-img contactm__split-img" data-reveal>
-          <img src="images/terrace-rope-view-1169.webp"
-               srcset="images/terrace-rope-view-640.webp 640w, images/terrace-rope-view-1000.webp 1000w, images/terrace-rope-view-1169.webp 1169w"
-               sizes="(max-width: 860px) 100vw, 40vw" width="1169" height="1935" loading="lazy" decoding="async"
-               alt="Тераса SAP SAN з видом на озеро крізь канатну огорожу">
-        </figure>
+async function pipeline(commands) {
+  const res = await fetch(`${REDIS_URL}/pipeline`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${REDIS_TOKEN}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(commands),
+  });
+  const data = await res.json();
+  return data.map(r => r.result);
+}
 
-        <div data-reveal>
-          <dl class="contactm__list" id="contactList"></dl>
-          <div class="contactm__actions">
-            <a class="btn btn--primary" id="routeBtn" href="#" target="_blank" rel="noopener">Прокласти маршрут
-              <svg class="btn__icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2 8h12M9 3l5 5-5 5"/></svg>
-            </a>
-            <a class="btn btn--ghost" href="booking.html">Забронювати</a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+async function createBooking(data) {
+  const id = await cmd('INCR', 'counter:booking');
+  const booking = { ...data, id: String(id), status: 'pending', createdAt: String(Date.now()) };
+  const flat = Object.entries(booking).flat();
+  await pipeline([
+    ['HSET', `booking:${id}`, ...flat],
+    ['ZADD', 'bookings:all', String(Date.now()), String(id)],
+    ['SADD', 'bookings:pending', String(id)],
+  ]);
+  return booking;
+}
 
-  <section class="contactm__mapbanner">
-    <div class="wrap contactm__mapbanner-head" data-reveal>
-      <p class="eyebrow">Розташування</p>
-      <h2 class="display d2">Тут ви можете нас знайти</h2>
-    </div>
-    <div class="contactm__mapbig" id="mapFrame" data-reveal></div>
-  </section>
-</main>
-<section class="section section--tight surface-ink">
-  <div class="wrap ctabar">
-    <div class="ctabar__text">
-      <h2 class="display d2">Забронювати відпочинок</h2>
-      <p class="lead" style="margin-top:.8rem">Будиночок або шезлонги біля басейну — залиште заявку, і ми звʼяжемося з вами.</p>
-    </div>
-    <div class="ctabar__actions">
-      <a class="btn btn--primary" href="booking.html">Залишити заявку</a>
-      <a class="btn btn--ghost" href="houses.html">Будиночки</a>
-    </div>
-  </div>
-</section>
-<footer class="footer surface-ink" id="footer"></footer>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
-<script src="js/images.js" defer></script>
-<script src="js/data.js" defer></script>
-<script src="js/chrome.js" defer></script>
-<script src="js/pages.js" defer></script>
-<script src="js/reveal.js" defer></script>
-</body>
-</html>
+async function getBooking(id) {
+  return toObject(await cmd('HGETALL', `booking:${id}`));
+}
+
+async function updateBookingStatus(id, status) {
+  const booking = await getBooking(id);
+  if (!booking) return null;
+  await pipeline([
+    ['SREM', `bookings:${booking.status}`, String(id)],
+    ['SADD', `bookings:${status}`, String(id)],
+    ['HSET', `booking:${id}`, 'status', status, 'updatedAt', String(Date.now())],
+  ]);
+  return { ...booking, status };
+}
+
+async function getBookingsByStatus(status) {
+  const ids = await cmd('SMEMBERS', `bookings:${status}`);
+  if (!ids || !ids.length) return [];
+  const bookings = await Promise.all(ids.map(id => getBooking(id)));
+  return bookings.filter(Boolean).sort((a, b) => Number(b.createdAt) - Number(a.createdAt));
+}
+
+async function getAllBookings() {
+  const ids = await cmd('ZRANGE', 'bookings:all', '0', '-1', 'REV');
+  if (!ids || !ids.length) return [];
+  const bookings = await Promise.all(ids.map(id => getBooking(id)));
+  return bookings.filter(Boolean);
+}
+
+async function createProperty(data) {
+  const id = await cmd('INCR', 'counter:property');
+  const property = { ...data, id: String(id), isActive: 'true', createdAt: String(Date.now()) };
+  const flat = Object.entries(property).flat();
+  await pipeline([
+    ['HSET', `property:${id}`, ...flat],
+    ['ZADD', 'properties:list', String(id), String(id)],
+  ]);
+  return property;
+}
+
+async function getProperty(id) {
+  return toObject(await cmd('HGETALL', `property:${id}`));
+}
+
+async function getAllProperties() {
+  const ids = await cmd('ZRANGE', 'properties:list', '0', '-1');
+  if (!ids || !ids.length) return [];
+  const props = await Promise.all(ids.map(id => getProperty(id)));
+  return props.filter(Boolean);
+}
+
+async function updateProperty(id, data) {
+  const flat = Object.entries({ ...data, updatedAt: String(Date.now()) }).flat();
+  await cmd('HSET', `property:${id}`, ...flat);
+  return getProperty(id);
+}
+
+async function deleteProperty(id) {
+  await pipeline([['DEL', `property:${id}`], ['ZREM', 'properties:list', String(id)]]);
+}
+
+async function getSettings() {
+  return toObject(await cmd('HGETALL', 'settings')) || {};
+}
+
+async function updateSettings(data) {
+  await cmd('HSET', 'settings', ...Object.entries(data).flat());
+}
+
+async function getPoolSettings() {
+  return toObject(await cmd('HGETALL', 'pool')) || {};
+}
+
+async function updatePoolSettings(data) {
+  await cmd('HSET', 'pool', ...Object.entries(data).flat());
+}
+
+async function getBotState(chatId) {
+  const raw = await cmd('GET', `bot_state:${chatId}`);
+  return raw ? JSON.parse(raw) : { step: 'idle', data: {} };
+}
+
+async function setBotState(chatId, state) {
+  await cmd('SET', `bot_state:${chatId}`, JSON.stringify(state), 'EX', '3600');
+}
+
+async function clearBotState(chatId) {
+  await cmd('DEL', `bot_state:${chatId}`);
+}
+
+module.exports = {
+  createBooking, getBooking, updateBookingStatus, getBookingsByStatus, getAllBookings,
+  createProperty, getProperty, getAllProperties, updateProperty, deleteProperty,
+  getSettings, updateSettings, getPoolSettings, updatePoolSettings,
+  getBotState, setBotState, clearBotState,
+};
