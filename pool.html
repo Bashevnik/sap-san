@@ -1,117 +1,143 @@
-<!doctype html>
-<html lang="uk">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Басейн і шезлонги — SAP SAN Resort &amp; Retreat</title>
-<meta name="description" content="Відкритий басейн SAP SAN над озером: години роботи, прайс для дорослих і дітей, вартість шезлонгів, правила відвідування та бронювання.">
-<link rel="canonical" href="https://sapsan-resort.com.ua/pool.html">
-<meta name="theme-color" content="#15140F">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="SAP SAN Resort &amp; Retreat">
-<meta property="og:title" content="Басейн і шезлонги — SAP SAN Resort &amp; Retreat">
-<meta property="og:description" content="Відкритий басейн SAP SAN над озером: години роботи, прайс для дорослих і дітей, вартість шезлонгів, правила відвідування та бронювання.">
-<meta property="og:locale" content="uk_UA">
-<meta property="og:image" content="images/pool-cabanas-1170.webp">
-<meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/sections.css">
-<link rel="stylesheet" href="css/pages.css">
-<link rel="stylesheet" href="css/redesign.css">
-<script>document.documentElement.classList.add('js');</script>
-</head>
-<body>
-<a class="skip-link" href="#main">Перейти до вмісту</a>
-<header class="header" id="header"></header>
-<div class="menu" id="menu" aria-hidden="true"></div>
+const REDIS_URL = process.env.UPSTASH_REDIS_REST_URL;
+const REDIS_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 
-<section class="page-hero">
-  <div class="page-hero__media">
-    <img src="images/pool-cabanas-1170.webp" srcset="images/pool-cabanas-640.webp 640w, images/pool-cabanas-1000.webp 1000w, images/pool-cabanas-1170.webp 1170w" sizes="100vw" width="1170" height="867" fetchpriority="high" decoding="async" alt="Відкритий басейн SAP SAN із шезлонгами та шатрами">
-  </div>
-  <div class="page-hero__body wrap">
-    <nav class="crumbs" aria-label="Хлібні крихти"><a href="index.html">Головна</a><span>/</span><span aria-current="page">Басейн</span></nav>
-    <p class="eyebrow" style="margin-top:1rem;color:var(--gold-soft)">Басейн</p>
-    <h1>Відкрита вода над озером</h1>
-    <p class="lead">Шезлонг, парасолька та роздягальня вже у вартості квитка. Діти до 5 років — безкоштовно.</p>
-  </div>
-</section>
-<main id="main">
-  <section class="section surface-ivory">
-    <div class="wrap poolpage__top">
-      <div data-reveal>
-        <p class="eyebrow">Прайс</p>
-        <h2 class="display d2" style="margin:.6rem 0 1.2rem;max-width:14ch">Вартість відвідування</h2>
-        <p class="lead" style="margin-bottom:1.8rem">Один квиток — цілий день біля води.
-          Шезлонг, парасолька та роздягальня вже входять у вартість, доплачувати
-          на місці не треба.</p>
-        <dl class="rates" id="poolRates"></dl>
-        <p class="small muted" style="margin-top:1rem">Ціни вказано за одну особу.</p>
-      </div>
+async function cmd(...args) {
+  const res = await fetch(REDIS_URL, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${REDIS_TOKEN}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(args),
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(`Redis error: ${data.error}`);
+  return data.result;
+}
 
-      <div class="poolpage__aside" data-reveal>
-        <div class="poolpage__hours">
-          <p class="eyebrow" style="margin-bottom:.7rem">Години роботи</p>
-          <b>10:00 — 22:00</b>
-          <p class="small muted" style="margin-top:.5rem">Щодня. Вечірні години — з 18:00 до 22:00 за окремим тарифом.</p>
-        </div>
-        <div>
-          <p class="eyebrow" style="margin-bottom:.8rem">Уже у вартості квитка</p>
-          <div style="display:flex;flex-wrap:wrap;gap:.5rem" id="poolIncluded"></div>
-        </div>
-        <figure class="poolpage__figure">
-          <img src="images/pool-wide-blue-900.webp" srcset="images/pool-wide-blue-640.webp 640w, images/pool-wide-blue-900.webp 900w" sizes="(max-width:900px) 100vw, 34vw" width="900" height="1600" loading="lazy" decoding="async" alt="Чиста вода басейну SAP SAN">
-        </figure>
-        <a class="btn btn--primary" href="booking.html?type=sunbeds">Забронювати шезлонг</a>
-        <a class="btn btn--ghost" href="tel:+380980938099">098 093 80 99</a>
-      </div>
-    </div>
-  </section>
+// Upstash HGETALL повертає плоский масив ["k","v","k","v"...]
+// Конвертуємо в об'єкт {k:v}
+function toObject(arr) {
+  if (!arr) return null;
+  if (!Array.isArray(arr)) return Object.keys(arr).length ? arr : null;
+  if (arr.length === 0) return null;
+  const obj = {};
+  for (let i = 0; i < arr.length; i += 2) obj[arr[i]] = arr[i + 1];
+  return obj;
+}
 
-  <section class="section surface-water">
-    <div class="wrap poolpage__rules">
-      <div data-reveal>
-        <p class="eyebrow">Правила</p>
-        <h2 class="display d2" style="margin:.6rem 0 1rem;max-width:12ch">Правила відвідування</h2>
-        <p class="lead">Коротко про те, що варто знати до приїзду.
-          Повний перелік і відповіді на часті питання — на сторінці «Правила».</p>
-        <a class="btn btn--ghost" href="rules.html" style="margin-top:1.4rem">Правила та FAQ</a>
-      </div>
-      <ul class="rules-list" id="poolRules" data-reveal></ul>
-    </div>
-  </section>
+async function pipeline(commands) {
+  const res = await fetch(`${REDIS_URL}/pipeline`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${REDIS_TOKEN}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(commands),
+  });
+  const data = await res.json();
+  return data.map(r => r.result);
+}
 
-  <section class="section surface-sand-2">
-    <div class="wrap">
-      <p class="eyebrow" data-reveal>Галерея</p>
-      <h2 class="display d2" data-reveal style="margin:.6rem 0 clamp(1.5rem,4vh,2.5rem)">Басейн і зона відпочинку</h2>
-      <div class="hgal" id="poolGallery"></div>
-    </div>
-  </section>
-</main>
-<section class="section section--tight surface-ink">
-  <div class="wrap ctabar">
-    <div class="ctabar__text">
-      <h2 class="display d2">Забронювати шезлонги</h2>
-      <p class="lead" style="margin-top:.8rem">Вкажіть дату та кількість — адміністратор підтвердить наявність.</p>
-    </div>
-    <div class="ctabar__actions">
-      <a class="btn btn--primary" href="booking.html?type=sunbeds">Забронювати шезлонг</a>
-      <a class="btn btn--ghost" href="tel:+380980938099">098 093 80 99</a>
-    </div>
-  </div>
-</section>
-<footer class="footer surface-ink" id="footer"></footer>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
-<script src="js/images.js" defer></script>
-<script src="js/data.js" defer></script>
-<script src="js/chrome.js" defer></script>
-<script src="js/pages.js" defer></script>
-<script src="js/reveal.js" defer></script>
-</body>
-</html>
+async function createBooking(data) {
+  const id = await cmd('INCR', 'counter:booking');
+  const booking = { ...data, id: String(id), status: 'pending', createdAt: String(Date.now()) };
+  const flat = Object.entries(booking).flat();
+  await pipeline([
+    ['HSET', `booking:${id}`, ...flat],
+    ['ZADD', 'bookings:all', String(Date.now()), String(id)],
+    ['SADD', 'bookings:pending', String(id)],
+  ]);
+  return booking;
+}
+
+async function getBooking(id) {
+  return toObject(await cmd('HGETALL', `booking:${id}`));
+}
+
+async function updateBookingStatus(id, status) {
+  const booking = await getBooking(id);
+  if (!booking) return null;
+  await pipeline([
+    ['SREM', `bookings:${booking.status}`, String(id)],
+    ['SADD', `bookings:${status}`, String(id)],
+    ['HSET', `booking:${id}`, 'status', status, 'updatedAt', String(Date.now())],
+  ]);
+  return { ...booking, status };
+}
+
+async function getBookingsByStatus(status) {
+  const ids = await cmd('SMEMBERS', `bookings:${status}`);
+  if (!ids || !ids.length) return [];
+  const bookings = await Promise.all(ids.map(id => getBooking(id)));
+  return bookings.filter(Boolean).sort((a, b) => Number(b.createdAt) - Number(a.createdAt));
+}
+
+async function getAllBookings() {
+  const ids = await cmd('ZRANGE', 'bookings:all', '0', '-1', 'REV');
+  if (!ids || !ids.length) return [];
+  const bookings = await Promise.all(ids.map(id => getBooking(id)));
+  return bookings.filter(Boolean);
+}
+
+async function createProperty(data) {
+  const id = await cmd('INCR', 'counter:property');
+  const property = { ...data, id: String(id), isActive: 'true', createdAt: String(Date.now()) };
+  const flat = Object.entries(property).flat();
+  await pipeline([
+    ['HSET', `property:${id}`, ...flat],
+    ['ZADD', 'properties:list', String(id), String(id)],
+  ]);
+  return property;
+}
+
+async function getProperty(id) {
+  return toObject(await cmd('HGETALL', `property:${id}`));
+}
+
+async function getAllProperties() {
+  const ids = await cmd('ZRANGE', 'properties:list', '0', '-1');
+  if (!ids || !ids.length) return [];
+  const props = await Promise.all(ids.map(id => getProperty(id)));
+  return props.filter(Boolean);
+}
+
+async function updateProperty(id, data) {
+  const flat = Object.entries({ ...data, updatedAt: String(Date.now()) }).flat();
+  await cmd('HSET', `property:${id}`, ...flat);
+  return getProperty(id);
+}
+
+async function deleteProperty(id) {
+  await pipeline([['DEL', `property:${id}`], ['ZREM', 'properties:list', String(id)]]);
+}
+
+async function getSettings() {
+  return toObject(await cmd('HGETALL', 'settings')) || {};
+}
+
+async function updateSettings(data) {
+  await cmd('HSET', 'settings', ...Object.entries(data).flat());
+}
+
+async function getPoolSettings() {
+  return toObject(await cmd('HGETALL', 'pool')) || {};
+}
+
+async function updatePoolSettings(data) {
+  await cmd('HSET', 'pool', ...Object.entries(data).flat());
+}
+
+async function getBotState(chatId) {
+  const raw = await cmd('GET', `bot_state:${chatId}`);
+  return raw ? JSON.parse(raw) : { step: 'idle', data: {} };
+}
+
+async function setBotState(chatId, state) {
+  await cmd('SET', `bot_state:${chatId}`, JSON.stringify(state), 'EX', '3600');
+}
+
+async function clearBotState(chatId) {
+  await cmd('DEL', `bot_state:${chatId}`);
+}
+
+module.exports = {
+  createBooking, getBooking, updateBookingStatus, getBookingsByStatus, getAllBookings,
+  createProperty, getProperty, getAllProperties, updateProperty, deleteProperty,
+  getSettings, updateSettings, getPoolSettings, updatePoolSettings,
+  getBotState, setBotState, clearBotState,
+};
