@@ -49,10 +49,10 @@ jobs:
       - name: Assemble site
         run: |
           mkdir -p _site
-          rsync -a --exclude='.git' --exclude='.github' --exclude='source-photos' main/ _site/
+          rsync -a --exclude-from=main/.deployignore main/ _site/
           if [ -d dev ] && [ -f dev/index.html ]; then
             mkdir -p _site/dev
-            rsync -a --exclude='.git' --exclude='.github' --exclude='source-photos' dev/ _site/dev/
+            rsync -a --exclude-from=main/.deployignore dev/ _site/dev/
             echo "dev-гілку опубліковано у /dev/"
           else
             echo "гілки dev ще немає — публікуємо лише main"

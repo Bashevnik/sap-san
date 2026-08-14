@@ -1,90 +1,136 @@
 <!doctype html>
-<html lang="uk">
+<html lang="uk" class="no-js">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Будиночки A-frame — SAP SAN Resort &amp; Retreat</title>
-<meta name="description" content="Три будиночки A-frame біля води: панорамне скління, тераса з мангалом, кухня. Ціни у будні, вихідні та свята, правила заїзду та виїзду.">
+<meta name="description" content="Три будиночки A-frame на озері SAP SAN: панорамне скління, тераса з мангалом, повна кухня. До 4 гостей. Ціни на будні, вихідні та вікенд, онлайн-заявка.">
 <link rel="canonical" href="https://sapsan-resort.com.ua/houses.html">
-<meta name="theme-color" content="#15140F">
+<meta name="theme-color" content="#0D1418">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="SAP SAN Resort &amp; Retreat">
-<meta property="og:title" content="Будиночки A-frame — SAP SAN Resort &amp; Retreat">
-<meta property="og:description" content="Три будиночки A-frame біля води: панорамне скління, тераса з мангалом, кухня. Ціни у будні, вихідні та свята, правила заїзду та виїзду.">
+<meta property="og:title" content="Будиночки A-frame — SAP SAN">
+<meta property="og:description" content="A-frame на воді: панорамне скління, тераса з мангалом, повна кухня.">
 <meta property="og:locale" content="uk_UA">
-<meta property="og:image" content="images/house-aframe-terrace-1170.webp">
-<meta name="twitter:card" content="summary_large_image">
+<meta property="og:image" content="https://sapsan-resort.com.ua/images/terrace-glass-1600.webp">
+
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/sections.css">
-<link rel="stylesheet" href="css/pages.css">
-<link rel="stylesheet" href="css/redesign.css">
-<script>document.documentElement.classList.add('js');</script>
+<link rel="preload" as="font" type="font/woff2" href="assets/fonts/cormorant-garamond-cyrillic-normal-300.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="assets/fonts/jost-cyrillic-normal-300.woff2" crossorigin>
+<link rel="stylesheet" href="css/core.css?v=10">
+<link rel="stylesheet" href="css/decor.css?v=10">
+<link rel="stylesheet" href="css/pages.css?v=10">
+<script>document.documentElement.className = 'js';</script>
 </head>
 <body>
 <a class="skip-link" href="#main">Перейти до вмісту</a>
 <header class="header" id="header"></header>
-<div class="menu" id="menu" aria-hidden="true"></div>
+<div class="menu" id="menu" aria-hidden="true" tabindex="-1"></div>
 
-<section class="page-hero">
-  <div class="page-hero__media">
-    <img src="images/houses-water-wide-2-1170.webp" srcset="images/houses-water-wide-2-640.webp 640w, images/houses-water-wide-2-1000.webp 1000w, images/houses-water-wide-2-1170.webp 1170w" sizes="100vw" width="1170" height="656" fetchpriority="high" decoding="async" alt="Будиночки A-frame SAP SAN на воді">
+<main id="main">
+
+<section class="phero">
+  <div class="phero__media">
+    <picture>
+      <source media="(max-width: 760px)" type="image/avif" srcset="images/terrace-glass-p-640.avif 640w, images/terrace-glass-p-960.avif 960w, images/terrace-glass-p-1280.avif 1280w" sizes="100vw">
+      <source media="(max-width: 760px)" type="image/webp" srcset="images/terrace-glass-p-640.webp 640w, images/terrace-glass-p-960.webp 960w, images/terrace-glass-p-1280.webp 1280w" sizes="100vw">
+      <source type="image/avif" srcset="images/terrace-glass-960.avif 960w, images/terrace-glass-1600.avif 1600w, images/terrace-glass-2000.avif 2000w, images/terrace-glass-2560.avif 2560w" sizes="100vw">
+      <source type="image/webp" srcset="images/terrace-glass-960.webp 960w, images/terrace-glass-1600.webp 1600w, images/terrace-glass-2000.webp 2000w, images/terrace-glass-2560.webp 2560w" sizes="100vw">
+      <img src="images/terrace-glass-1600.webp" width="3200" height="1800" style="--fx:55%;--fy:50%"
+           fetchpriority="high" decoding="async"
+           alt="Скляна стіна будиночка A-frame і тераса зі столом над водою">
+    </picture>
   </div>
-  <div class="page-hero__body wrap">
-    <nav class="crumbs" aria-label="Хлібні крихти"><a href="index.html">Головна</a><span>/</span><span aria-current="page">Будиночки</span></nav>
-    <p class="eyebrow" style="margin-top:1rem;color:var(--gold-soft)">Будиночки</p>
-    <h1>Три A-frame біля самої води</h1>
-    <p class="lead">Панорамне скління, власна тераса з мангалом і повноцінна кухня. До 4 гостей у кожному.</p>
+  <div class="phero__body wrap">
+    <nav class="crumbs" aria-label="Хлібні крихти">
+      <a href="index.html">Головна</a><span>/</span><span aria-current="page">Будиночки</span>
+    </nav>
+    <p class="label" style="color:rgba(242,240,233,.78)">Проживання</p>
+    <h1 class="display d1 phero__title">A-frame просто на воді</h1>
+    <p class="lead phero__lead">Три будиночки на озері. Панорамне скління, власна тераса з мангалом, повна кухня й місце для чотирьох. Заїзд з 14:00, виїзд до 12:00.</p>
   </div>
 </section>
-<main id="main">
-  <section class="section surface-ivory">
-    <div class="wrap"><div class="hcards" id="housesList"></div></div>
-  </section>
 
-  <section class="section surface-sand">
-    <div class="wrap">
-      <p class="eyebrow" data-reveal>Умови</p>
-      <h2 class="display d2" data-reveal style="margin-top:.6rem;max-width:14ch">Що входить у вартість</h2>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:clamp(2rem,5vw,4rem);margin-top:clamp(2rem,5vh,3rem)">
-        <ul class="rules-list" data-reveal>
+<!-- Кожен будиночок — розворот, а не картка: великий кадр і
+     вузька колонка з фактами, дзеркально в парних рядках. -->
+<section class="section on-paper" style="position:relative;overflow:hidden">
+  <span class="decor decor--willow decor-top-right decor--flip" data-lax="drop" aria-hidden="true"></span>
+  <div class="wrap">
+    <div class="hlist" id="housesList"></div>
+  </div>
+</section>
+
+<section class="section on-linen">
+  <div class="wrap">
+    <div class="head head__row" style="margin-bottom:clamp(2rem,5vh,3rem)">
+      <div>
+        <p class="label" data-reveal>Тарифи</p>
+        <h2 class="display d2" data-split style="margin-top:1rem;max-width:14ch">Однакова ціна на будь-який будиночок</h2>
+      </div>
+      <p class="lead" data-reveal style="max-width:32ch">Вартість рахується за добу за весь будинок, а не за гостя.</p>
+    </div>
+
+    <div class="grid">
+      <dl class="rates col-l7" data-reveal>
+        <div class="rates__row"><dt><b>Будні</b><span>Понеділок — Четвер · за добу</span></dt><dd>4 000 грн</dd></div>
+        <div class="rates__row"><dt><b>Вихідні</b><span>П’ятниця — Неділя · за добу</span></dt><dd>6 000 грн</dd></div>
+        <div class="rates__row"><dt><b>Вікенд зі знижкою</b><span>2 доби у вихідні · економія 2 000 грн</span></dt><dd>5 000 грн</dd></div>
+        <div class="rates__row"><dt><b>Свята</b><span>Святкові та довгі вихідні</span></dt><dd>за запитом</dd></div>
+      </dl>
+
+      <div class="col-r5" data-reveal="0.08">
+        <p class="label" style="margin-bottom:1.1rem">У вартість входить</p>
+        <ul class="tri-list">
           <li>Повне користування будинком та прилеглою територією</li>
-          <li>Облаштована зона для відпочинку — мангал, тераса</li>
+          <li>Облаштована зона відпочинку — мангал, тераса</li>
           <li>Чиста постільна білизна, рушники та базові засоби гігієни</li>
           <li>Посуд та кухонне приладдя</li>
         </ul>
-        <ul class="rules-list" data-reveal>
-          <li>Час заїзду — з 14:00</li>
-          <li>Час виїзду — до 12:00</li>
-          <li>Для фіксації дати обовʼязкова передоплата</li>
-          <li>Заявка на сайті не означає автоматичне підтвердження бронювання</li>
-        </ul>
+        <p class="small mute" style="margin-top:1.4rem">Для фіксації дати обов’язкова передоплата. Заявка на сайті не означає автоматичне підтвердження бронювання.</p>
+        <div class="btns" style="margin-top:1.4rem">
+          <a class="btn" href="booking.html?type=house">Залишити заявку
+            <svg class="btn__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18M14.4 5.4 21 12l-6.6 6.6"/></svg>
+          </a>
+          <a class="btn btn--ghost" href="rules.html">Правила</a>
+        </div>
       </div>
-    </div>
-  </section>
-</main>
-<section class="section section--tight surface-ink">
-  <div class="wrap ctabar">
-    <div class="ctabar__text">
-      <h2 class="display d2">Готові обрати дату?</h2>
-      <p class="lead" style="margin-top:.8rem">Залиште заявку — ми перевіримо доступність і зателефонуємо для підтвердження.</p>
-    </div>
-    <div class="ctabar__actions">
-      <a class="btn btn--primary" href="booking.html">Залишити заявку</a>
-      <a class="btn btn--ghost" href="tel:+380980938099">098 093 80 99</a>
     </div>
   </div>
 </section>
-<footer class="footer surface-ink" id="footer"></footer>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
-<script src="js/images.js" defer></script>
-<script src="js/data.js" defer></script>
-<script src="js/chrome.js" defer></script>
-<script src="js/pages.js" defer></script>
-<script src="js/reveal.js" defer></script>
+
+<section class="finale">
+  <div class="finale__media">
+    <picture>
+      <source type="image/avif" srcset="images/terrace-evening-960.avif 960w, images/terrace-evening-1600.avif 1600w, images/terrace-evening-2560.avif 2560w" sizes="100vw">
+      <source type="image/webp" srcset="images/terrace-evening-960.webp 960w, images/terrace-evening-1600.webp 1600w, images/terrace-evening-2560.webp 2560w" sizes="100vw">
+      <img src="images/terrace-evening-1600.webp" width="3200" height="1800" style="--fx:58%;--fy:55%" loading="lazy" decoding="async"
+           alt="Тераса будиночка A-frame зі столом і кріслами у вечірньому світлі">
+    </picture>
+  </div>
+  <div class="finale__body wrap">
+    <div class="rule-bird" aria-hidden="true"></div>
+    <h2 class="display d1" data-split style="max-width:13ch">Перевіримо дати й зателефонуємо</h2>
+    <p class="lead" data-reveal>Заявка займає хвилину. Далі все підтверджує адміністратор.</p>
+    <a class="btn btn--light" href="booking.html?type=house" data-reveal="0.08">Забронювати будиночок
+      <svg class="btn__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18M14.4 5.4 21 12l-6.6 6.6"/></svg>
+    </a>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer on-ink" id="footer"></footer>
+
+<script src="js/vendor/gsap.min.js" defer></script>
+<script src="js/vendor/ScrollTrigger.min.js" defer></script>
+<script src="js/vendor/lax.min.js" defer></script>
+<script src="js/config.js?v=10" defer></script>
+<script src="js/images.js?v=10" defer></script>
+<script src="js/falcon.js?v=10" defer></script>
+<script src="js/data.js?v=10" defer></script>
+<script src="js/brand.js?v=10" defer></script>
+<script src="js/chrome.js?v=10" defer></script>
+<script src="js/pages.js?v=10" defer></script>
+<script src="js/motion.js?v=10" defer></script>
 </body>
 </html>

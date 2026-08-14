@@ -1,86 +1,97 @@
 <!doctype html>
-<html lang="uk">
+<html lang="uk" class="no-js">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Будиночок — SAP SAN Resort &amp; Retreat</title>
-<meta name="description" content="Будиночок A-frame у SAP SAN: фото, опис, зручності, кількість гостей, ціни та правила заїзду.">
+<meta name="description" content="Будиночок A-frame на озері SAP SAN: панорамне скління, тераса з мангалом, кухня, санвузол. До 4 гостей.">
 <link rel="canonical" href="https://sapsan-resort.com.ua/house.html">
-<meta name="theme-color" content="#15140F">
+<meta name="theme-color" content="#0D1418">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="SAP SAN Resort &amp; Retreat">
-<meta property="og:title" content="Будиночок — SAP SAN Resort &amp; Retreat">
-<meta property="og:description" content="Будиночок A-frame у SAP SAN: фото, опис, зручності, кількість гостей, ціни та правила заїзду.">
 <meta property="og:locale" content="uk_UA">
-<meta property="og:image" content="images/houses-water-wide-1170.webp">
-<meta name="twitter:card" content="summary_large_image">
+<meta property="og:image" content="https://sapsan-resort.com.ua/images/lake-aframe-1600.webp">
+
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/sections.css">
-<link rel="stylesheet" href="css/pages.css">
-<link rel="stylesheet" href="css/redesign.css">
-<script>document.documentElement.classList.add('js');</script>
+<link rel="preload" as="font" type="font/woff2" href="assets/fonts/cormorant-garamond-cyrillic-normal-300.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="assets/fonts/jost-cyrillic-normal-300.woff2" crossorigin>
+<link rel="stylesheet" href="css/core.css?v=10">
+<link rel="stylesheet" href="css/decor.css?v=10">
+<link rel="stylesheet" href="css/pages.css?v=10">
+<script>document.documentElement.className = 'js';</script>
+<script id="house-schema" type="application/ld+json">{}</script>
 </head>
 <body>
 <a class="skip-link" href="#main">Перейти до вмісту</a>
 <header class="header" id="header"></header>
-<div class="menu" id="menu" aria-hidden="true"></div>
+<div class="menu" id="menu" aria-hidden="true" tabindex="-1"></div>
 
-<section class="page-hero">
-  <div class="page-hero__media" id="houseHero"></div>
-  <div class="page-hero__body wrap">
+<main id="main">
+
+<section class="phero">
+  <div class="phero__media" id="houseHero"></div>
+  <div class="phero__body wrap">
     <nav class="crumbs" aria-label="Хлібні крихти">
       <a href="index.html">Головна</a><span>/</span>
       <a href="houses.html">Будиночки</a><span>/</span>
-      <span id="houseKicker" aria-current="page"></span>
+      <span aria-current="page" id="houseCrumb">Будиночок</span>
     </nav>
-    <h1 id="houseTitle" style="margin-top:1rem"></h1>
-    <p class="lead" id="houseLead"></p>
+    <p class="label" id="houseKicker" style="color:rgba(242,240,233,.78)"></p>
+    <h1 class="display d1 phero__title" id="houseTitle"></h1>
+    <p class="lead phero__lead" id="houseLead"></p>
+    <div class="btns" style="margin-top:.6rem">
+      <a class="btn btn--light" href="booking.html?type=house">Залишити заявку
+        <svg class="btn__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18M14.4 5.4 21 12l-6.6 6.6"/></svg>
+      </a>
+      <a class="btn btn--ghost" href="#shots" style="--btn-fg:#F2F0E9;border-color:rgba(242,240,233,.42)">Фото</a>
+    </div>
   </div>
 </section>
 
-<main id="main">
-  <section class="section surface-ivory">
-    <div class="wrap hdetail" id="houseDetail"></div>
-  </section>
+<section class="section on-paper">
+  <div class="wrap">
+    <div class="hdetail" id="houseDetail"></div>
+  </div>
+</section>
 
-  <section class="section surface-sand-2">
-    <div class="wrap">
-      <p class="eyebrow" data-reveal>Фотографії</p>
-      <h2 class="display d2" data-reveal style="margin:.6rem 0 clamp(1.5rem,4vh,2.5rem)">Як це виглядає</h2>
-      <div class="hgal" id="houseGallery"></div>
+<section class="section on-linen" id="shots">
+  <div class="wrap">
+    <div class="head" style="margin-bottom:clamp(1.6rem,4vh,2.6rem)">
+      <p class="label" data-reveal>Кадри</p>
+      <h2 class="display d2" data-split style="max-width:14ch">Як це виглядає всередині</h2>
     </div>
-  </section>
+    <div class="shots" id="houseShots"></div>
+  </div>
+</section>
 
-  <section class="section surface-ivory">
-    <div class="wrap">
-      <p class="eyebrow" data-reveal>Інші будиночки</p>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:clamp(1rem,2.5vw,2rem);margin-top:1.5rem" id="otherHouses"></div>
+<section class="section on-paper" style="position:relative;overflow:hidden">
+  <span class="decor decor--pine decor-bot-right" data-lax="slow" aria-hidden="true"></span>
+  <div class="wrap">
+    <div class="head head__row" style="margin-bottom:clamp(1.6rem,4vh,2.6rem)">
+      <div>
+        <p class="label" data-reveal>Інші будиночки</p>
+        <h2 class="display d2" data-split style="margin-top:1rem;max-width:12ch">Подивіться ще</h2>
+      </div>
+      <a class="btn btn--ghost" href="houses.html" data-reveal>Усі будиночки</a>
     </div>
-  </section>
+    <div class="others" id="otherHouses"></div>
+  </div>
+</section>
+
 </main>
-<section class="section section--tight surface-ink">
-  <div class="wrap ctabar">
-    <div class="ctabar__text">
-      <h2 class="display d2">Забронювати цей будиночок</h2>
-      <p class="lead" style="margin-top:.8rem">Ми перевіримо доступність дат і зателефонуємо для підтвердження.</p>
-    </div>
-    <div class="ctabar__actions">
-      <a class="btn btn--primary" href="booking.html?type=house">Залишити заявку</a>
-      <a class="btn btn--ghost" href="houses.html">Усі будиночки</a>
-    </div>
-  </div>
-</section>
-<footer class="footer surface-ink" id="footer"></footer>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
-<script src="js/images.js" defer></script>
-<script src="js/data.js" defer></script>
-<script src="js/chrome.js" defer></script>
-<script src="js/pages.js" defer></script>
-<script src="js/reveal.js" defer></script>
+
+<footer class="footer on-ink" id="footer"></footer>
+
+<script src="js/vendor/gsap.min.js" defer></script>
+<script src="js/vendor/ScrollTrigger.min.js" defer></script>
+<script src="js/vendor/lax.min.js" defer></script>
+<script src="js/config.js?v=10" defer></script>
+<script src="js/images.js?v=10" defer></script>
+<script src="js/falcon.js?v=10" defer></script>
+<script src="js/data.js?v=10" defer></script>
+<script src="js/brand.js?v=10" defer></script>
+<script src="js/chrome.js?v=10" defer></script>
+<script src="js/pages.js?v=10" defer></script>
+<script src="js/motion.js?v=10" defer></script>
 </body>
 </html>

@@ -1,0 +1,22 @@
+# Що НЕ потрапляє на GitHub Pages (rsync --exclude-from).
+#
+# Головне тут — new-images/: це оригінали 3200×1800 PNG на ~140 МБ,
+# єдине джерело для tools/build-images.js. У репозиторії вони
+# потрібні, у зібраному сайті — ні: браузер бачить лише похідні
+# з images/.
+
+.git
+.github
+.deployignore
+
+# Оригінали фото та інструменти збірки
+new-images
+source-photos
+tools
+node_modules
+package.json
+package-lock.json
+
+# Робочі документи, не частина сайту
+BOT_PROMPT.md
+CONTENT_REQUEST.md

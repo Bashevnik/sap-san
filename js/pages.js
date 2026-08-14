@@ -1,7 +1,10 @@
 /* ============================================================
-   SAP SAN — INNER PAGES RENDERER
-   Кожна секція малюється з SAPSAN.data, тому підміна на API
-   не потребує правок у розмітці.
+   SAP SAN — ВНУТРІШНІ СТОРІНКИ
+   ------------------------------------------------------------
+   Кожна секція малюється з SAPSAN.data, тому підміна контенту
+   на API не потребує правок у розмітці. Файл підключається на
+   всіх внутрішніх сторінках; зайві рендери просто не знаходять
+   своїх вузлів і мовчки виходять.
    ============================================================ */
 (function () {
   'use strict';
@@ -9,69 +12,66 @@
   const D = window.SAPSAN;
   if (!D) return;
   const S = D.data.settings;
-  const $ = (s, c) => (c || document).querySelector(s);
+  const $  = (s, c) => (c || document).querySelector(s);
   const $$ = (s, c) => Array.from((c || document).querySelectorAll(s));
   const P = D.price.bind(D);
+  const I = D.icon;
+  const ARROW = I('arrow', 'btn__ico');
 
-  const ARROW = '<svg class="btn__icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2 8h12M9 3l5 5-5 5"/></svg>';
-
-  const ADV_ICONS = {
-    wave: '<path d="M2 15c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2M2 9c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2"/>',
-    pool: '<path d="M3 20c2 0 2-1.5 4-1.5S9 20 11 20s2-1.5 4-1.5S17 20 19 20M8 17V5a2 2 0 0 1 4 0M16 17V5a2 2 0 0 1 4 0M8 9h4M8 13h4"/>',
-    fork: '<path d="M6 3v7a2 2 0 0 0 4 0V3M8 10v11M17 3c-1.5 1.5-2 3-2 5s.5 3 2 3v10"/>',
-    fire: '<path d="M12 3s5 4 5 9a5 5 0 0 1-10 0c0-2 1-3 1-3s.5 2 2 2c0-3 2-6 2-8Z"/>',
-    tree: '<path d="M12 3 6 12h3l-4 6h14l-4-6h3L12 3ZM12 18v3"/>',
-    key:  '<circle cx="8" cy="12" r="4"/><path d="M12 12h9M18 12v3M15 12v2"/>'
-  };
-
-  /* ---------- ПЕРЕВАГИ ------------------------------------ */
-  function advantages() {
-    const box = $('#advantages');
-    if (!box) return;
-    box.innerHTML = (D.data.advantages || []).map(a => `
-      <article class="adv__item" data-reveal>
-        <svg class="adv__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-             stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          ${ADV_ICONS[a.icon] || ADV_ICONS.tree}
-        </svg>
-        <h3>${a.title}</h3>
-        <p>${a.text}</p>
-      </article>`).join('');
+  /**
+   * sizes для стрічки .shots (css/pages.css): 6-колонкова сітка,
+   * де перший кадр займає 4/6, другий і третій — по 2/6, четвертий
+   * і п'ятий — по 3/6 (тобто рівно половину). Раніше всі кадри,
+   * крім першого, отримували однакове «30vw», хоча четвертий і
+   * п'ятий фактично рендеряться вдвічі ширшими (виміряно в
+   * браузері: 798px замість очікуваних 526px при 1920px viewport,
+   * тобто delivered ratio 0.72 — помітно м'якше зображення).
+   * sizes береться з максимуму по брейкпоінтах: mobile-версія
+   * ширша за розрахунок, тому невелике завищення нешкідливе,
+   * а заниження — ні.
+   */
+  function shotsSizes(i) {
+    if (i === 0) return '(max-width: 760px) 94vw, 62vw';
+    if (i === 1 || i === 2) return '(max-width: 760px) 46vw, 30vw';
+    return '(max-width: 760px) 46vw, 48vw';
   }
 
-  /* ---------- СПИСОК БУДИНОЧКІВ --------------------------- */
+  /* ---------- СПИСОК БУДИНОЧКІВ ---------------------------- */
   function housesList() {
     const box = $('#housesList');
     if (!box) return;
     const pr = D.data.housePricing;
-    box.innerHTML = (D.data.houses || []).map(h => `
-      <article class="hcard" data-reveal>
-        <a class="hcard__media" href="house.html?id=${h.id}" aria-label="${h.name} — детальніше">
-          ${D.imgTag(h.hero, { alt: h.name + ' — SAP SAN', sizes: '(max-width: 860px) 100vw, 50vw' })}
-          <span class="hcard__n">${h.index}</span>
+
+    box.innerHTML = (D.data.houses || []).map((h, i) => `
+      <article class="hrow" data-reveal>
+        <a class="hrow__media" href="house.html?id=${h.id}" aria-label="${h.name} — детальніше">
+          <div class="figure reveal-img" style="position:relative">
+            ${D.picture(h.hero, { sizes: '(max-width: 980px) 94vw, 56vw', alt: h.name + ' — SAP SAN' })}
+            <span class="hrow__n">${h.index}</span>
+          </div>
         </a>
-        <div class="hcard__body">
-          <p class="eyebrow">${h.kicker}</p>
-          <h2>${h.name}</h2>
-          <p class="lead">${h.lead}</p>
-          <p class="hcard__facts">
-            <span class="chip">до ${h.guests} гостей</span>
-            <span class="chip">${h.beds}</span>
-          </p>
-          <div class="hcard__price">
+        <div class="hrow__body">
+          <p class="label">${h.kicker}</p>
+          <h2 class="display d2">${h.name}</h2>
+          <p class="body">${h.lead}</p>
+          <div class="hrow__facts">
+            <div><b>Гостей</b><span>до ${h.guests}</span></div>
+            <div><b>Спальні місця</b><span>${h.beds}</span></div>
+            <div><b>Заїзд · виїзд</b><span>з ${S.checkIn} · до ${S.checkOut}</span></div>
+          </div>
+          <div class="hrow__price">
             <div><b>${P(pr.weekday.price)}</b><span>${pr.weekday.note}</span></div>
             <div><b>${P(pr.weekend.price)}</b><span>${pr.weekend.note}</span></div>
-            <div><b>${P(pr.holiday.price)}</b><span>${pr.holiday.label}</span></div>
           </div>
-          <div class="hcard__actions">
-            <a class="btn btn--primary" href="booking.html?type=house&house=${h.id}">Залишити заявку ${ARROW}</a>
+          <div class="btns">
+            <a class="btn" href="booking.html?type=house&house=${h.id}">Залишити заявку ${ARROW}</a>
             <a class="btn btn--ghost" href="house.html?id=${h.id}">Детальніше</a>
           </div>
         </div>
       </article>`).join('');
   }
 
-  /* ---------- ДЕТАЛЬ БУДИНОЧКА ---------------------------- */
+  /* ---------- ДЕТАЛЬ БУДИНОЧКА ----------------------------- */
   function houseDetail() {
     const root = $('#houseDetail');
     if (!root) return;
@@ -79,81 +79,105 @@
     const h = D.house(id) || D.data.houses[0];
     const pr = D.data.housePricing;
 
-    /* Hero */
     const hero = $('#houseHero');
     if (hero) {
-      hero.innerHTML = D.imgTag(h.hero, { alt: h.name + ' — SAP SAN', sizes: '100vw', priority: true });
+      hero.innerHTML = D.picture(h.hero, {
+        sizes: '100vw', priority: true, alt: h.name + ' — SAP SAN',
+        art: { media: '(max-width: 760px)', kind: 'p' }
+      });
     }
-    const t = $('#houseTitle'); if (t) t.textContent = h.name;
+    const t = $('#houseTitle');  if (t) t.textContent = h.name;
     const k = $('#houseKicker'); if (k) k.textContent = h.kicker;
-    const l = $('#houseLead'); if (l) l.textContent = h.lead;
+    const l = $('#houseLead');   if (l) l.textContent = h.lead;
+    const c = $('#houseCrumb');  if (c) c.textContent = h.name;
+
     document.title = h.name + ' — SAP SAN Resort & Retreat';
     const md = $('meta[name="description"]');
     if (md) md.setAttribute('content', h.lead);
 
     root.innerHTML = `
       <div class="hdetail__main">
-        <p class="hdetail__desc">${h.description}</p>
+        <p class="hdetail__desc" data-reveal>${h.description}</p>
 
-        <dl class="hdetail__specs">
+        <dl class="specs" data-reveal>
           <div><dt>Гостей</dt><dd>до ${h.guests}</dd></div>
           <div><dt>Спальні місця</dt><dd>${h.beds}</dd></div>
           <div><dt>Заїзд</dt><dd>з ${S.checkIn}</dd></div>
           <div><dt>Виїзд</dt><dd>до ${S.checkOut}</dd></div>
         </dl>
 
-        <div>
-          <p class="eyebrow" style="margin-bottom:1rem">Зручності</p>
-          <ul class="hdetail__amen">${(h.amenities || []).map(a => `<li>${a}</li>`).join('')}</ul>
+        <div data-reveal>
+          <p class="label" style="margin-bottom:1.1rem">Зручності</p>
+          <ul class="amen">${(h.amenities || []).map(a => `<li>${a}</li>`).join('')}</ul>
         </div>
 
-        <div>
-          <p class="eyebrow" style="margin-bottom:1rem">У вартість входить</p>
-          <ul class="rules-list">${(pr.included || []).map(i => `<li>${i}</li>`).join('')}</ul>
+        <div data-reveal>
+          <p class="label" style="margin-bottom:1.1rem">У вартість входить</p>
+          <ul class="tri-list">${(pr.included || []).map(i => `<li>${i}</li>`).join('')}</ul>
         </div>
 
-        <div>
-          <p class="eyebrow" style="margin-bottom:1rem">Правила заїзду та виїзду</p>
-          <ul class="rules-list">${(pr.rules || []).map(i => `<li>${i}</li>`).join('')}</ul>
+        <div data-reveal>
+          <p class="label" style="margin-bottom:1.1rem">Заїзд і виїзд</p>
+          <ul class="tri-list">${(pr.rules || []).map(i => `<li>${i}</li>`).join('')}</ul>
         </div>
       </div>
 
-      <aside class="hdetail__aside">
-        <p class="eyebrow">Вартість за добу</p>
-        <dl style="display:grid">
-          <div class="hdetail__rate"><dt><b>${pr.weekday.label}</b><span>${pr.weekday.note}</span></dt><dd>${P(pr.weekday.price)}</dd></div>
-          <div class="hdetail__rate"><dt><b>${pr.weekend.label}</b><span>${pr.weekend.note}</span></dt><dd>${P(pr.weekend.price)}</dd></div>
-          <div class="hdetail__rate"><dt><b>${pr.special.label}</b><span>${pr.special.note} · ${pr.special.save}</span></dt><dd>${P(pr.special.price)}</dd></div>
-          <div class="hdetail__rate"><dt><b>${pr.holiday.label}</b><span>${pr.holiday.note}</span></dt><dd>${P(pr.holiday.price)}</dd></div>
+      <aside class="aside" data-reveal>
+        <p class="label">Вартість за добу</p>
+        <dl>
+          <div class="aside__rate"><dt><b>${pr.weekday.label}</b><span>${pr.weekday.note}</span></dt><dd>${P(pr.weekday.price)}</dd></div>
+          <div class="aside__rate"><dt><b>${pr.weekend.label}</b><span>${pr.weekend.note}</span></dt><dd>${P(pr.weekend.price)}</dd></div>
+          <div class="aside__rate"><dt><b>${pr.special.label}</b><span>${pr.special.note} · ${pr.special.save}</span></dt><dd>${P(pr.special.price)}</dd></div>
+          <div class="aside__rate"><dt><b>${pr.holiday.label}</b><span>${pr.holiday.note}</span></dt><dd>${P(pr.holiday.price)}</dd></div>
         </dl>
-        <a class="btn btn--primary" href="booking.html?type=house&house=${h.id}">Залишити заявку ${ARROW}</a>
+        <a class="btn" href="booking.html?type=house&house=${h.id}">Залишити заявку ${ARROW}</a>
         <a class="btn btn--ghost" href="tel:${S.phoneHref}">${S.phone}</a>
-        <p class="hdetail__note">Заявка на сайті не означає автоматичне підтвердження бронювання. Для фіксації дати потрібна передоплата.</p>
+        <p class="aside__note">Заявка на сайті не означає автоматичне підтвердження бронювання. Для фіксації дати потрібна передоплата.</p>
       </aside>`;
 
-    /* Галерея будиночка */
-    const gal = $('#houseGallery');
+    const gal = $('#houseShots');
     if (gal) {
-      gal.innerHTML = (h.gallery || []).slice(0, 5).map(g => `
-        <figure>${D.imgTag(g, { alt: h.name + ' — SAP SAN', sizes: '(max-width: 700px) 50vw, 33vw' })}</figure>`).join('');
+      gal.classList.add('shots--wide');
+      gal.innerHTML = (h.gallery || []).slice(0, 2).map(g => `
+        <figure>
+          <div class="figure figure--free reveal-img">
+            ${D.picture(g, { sizes: '(max-width: 780px) 94vw, 74vw' })}
+          </div>
+        </figure>`).join('');
     }
 
-    /* Інші будиночки */
     const other = $('#otherHouses');
     if (other) {
       other.innerHTML = D.data.houses.filter(x => x.id !== h.id).map(x => `
-        <a class="hcard__media" href="house.html?id=${x.id}" style="aspect-ratio:4/3;display:block" aria-label="${x.name}">
-          ${D.imgTag(x.hero, { alt: x.name, sizes: '(max-width: 780px) 100vw, 45vw' })}
-          <span class="hcard__n">${x.name}</span>
+        <a href="house.html?id=${x.id}" data-reveal>
+          <div class="figure reveal-img">${D.picture(x.hero, { sizes: '(max-width: 780px) 94vw, 44vw', alt: x.name })}</div>
+          <b>${x.name}</b>
         </a>`).join('');
+    }
+
+    /* Структуровані дані конкретного будиночка */
+    const node = $('#house-schema');
+    if (node) {
+      node.textContent = JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'Accommodation',
+        name: h.name,
+        description: h.description,
+        occupancy: { '@type': 'QuantitativeValue', maxValue: h.guests },
+        amenityFeature: (h.amenities || []).map(a => ({
+          '@type': 'LocationFeatureSpecification', name: a, value: true
+        })),
+        image: location.origin + '/' + D.img(h.hero)
+      });
     }
   }
 
-  /* ---------- БАСЕЙН -------------------------------------- */
+  /* ---------- БАСЕЙН --------------------------------------- */
   function poolPage() {
+    const p = D.data.pool || {};
+
     const rates = $('#poolRates');
     if (rates) {
-      const p = D.data.pool;
       rates.innerHTML =
         (p.tariffs || []).map(t => `
           <div class="rates__row">
@@ -162,13 +186,13 @@
           </div>`).join('') +
         (p.children || []).map(c => {
           /* Не дублюємо підпис, якщо він збігається з ціною
-             («безкоштовно» — і в ціні, і в примітці) */
+             («безкоштовно» і в ціні, і в примітці). */
           const priceText = c.price === null ? 'уточнюйте' : P(c.price);
           const note = (c.note && c.note.toLowerCase() !== priceText.toLowerCase()) ? c.note : '';
           return `
           <div class="rates__row">
             <dt><b>${c.label}</b>${note ? '<span>' + note + '</span>' : ''}</dt>
-            <dd>${c.price === null ? '<small style="margin:0">уточнюйте</small>' : P(c.price)}</dd>
+            <dd>${priceText}</dd>
           </div>`;
         }).join('') +
         (p.extras || []).map(e => `
@@ -179,19 +203,23 @@
     }
 
     const incl = $('#poolIncluded');
-    if (incl) incl.innerHTML = (D.data.pool.included || []).map(i => `<span class="chip">${i}</span>`).join('');
+    if (incl) incl.innerHTML = (p.included || []).map(i => `<span class="chip">${I('shield')}${i}</span>`).join('');
 
     const rl = $('#poolRules');
-    if (rl) rl.innerHTML = (D.data.pool.rules || []).map(r => `<li>${r}</li>`).join('');
+    if (rl) rl.innerHTML = (p.rules || []).map(r => `<li>${r}</li>`).join('');
 
-    const pg = $('#poolGallery');
+    const pg = $('#poolShots');
     if (pg) {
-      pg.innerHTML = (D.data.pool.gallery || []).slice(0, 5).map(g => `
-        <figure>${D.imgTag(g, { alt: 'Басейн SAP SAN', sizes: '(max-width: 700px) 50vw, 33vw' })}</figure>`).join('');
+      pg.innerHTML = (p.gallery || []).slice(0, 5).map((g, i) => `
+        <figure>
+          <div class="figure reveal-img">
+            ${D.picture(g, { sizes: shotsSizes(i) })}
+          </div>
+        </figure>`).join('');
     }
   }
 
-  /* ---------- ГАЛЕРЕЯ ------------------------------------- */
+  /* ---------- ГАЛЕРЕЯ -------------------------------------- */
   function galleryPage() {
     const grid = $('#ggrid');
     if (!grid) return;
@@ -203,14 +231,17 @@
         `<button type="button" data-tag="${t}" aria-pressed="${i === 0}">${t}</button>`).join('');
     }
 
+    /* Кожен третій кадр — вертикальний: у колонковій масонрі
+       це прибирає ефект однакових плиток. */
     grid.innerHTML = items.map((g, i) => `
       <figure class="ggrid__item" data-tag="${g.tag}">
-        ${D.imgTag(g.image, { alt: g.alt, sizes: '(max-width: 780px) 50vw, 33vw' })}
+        <div class="figure reveal-img">
+          ${D.picture(g.image, { sizes: '(max-width: 520px) 92vw, (max-width: 900px) 46vw, 31vw', kind: i % 3 === 1 ? 'p' : null })}
+        </div>
         <figcaption class="ggrid__cap">${g.tag}</figcaption>
-        <button type="button" data-i="${i}" aria-label="Відкрити: ${g.alt}"></button>
+        <button type="button" data-i="${i}" aria-label="Відкрити на весь екран: ${D.alt(g.image)}"></button>
       </figure>`).join('');
 
-    /* Фільтр */
     if (filter) {
       filter.addEventListener('click', e => {
         const b = e.target.closest('[data-tag]');
@@ -223,27 +254,39 @@
       });
     }
 
-    /* Лайтбокс */
+    /* ---- Лайтбокс ---- */
     const lb = $('#lightbox');
     if (!lb) return;
     const lbImg = $('img', lb);
     const lbCap = $('.lightbox__cap', lb);
-    let cur = 0;
-    const visible = () => $$('.ggrid__item:not(.is-hidden) button', grid).map(b => +b.dataset.i);
+    let cur = 0, lastFocus = null;
+    const visible = () => $$('.ggrid__item:not(.is-hidden) button[data-i]', grid).map(b => +b.dataset.i);
 
-    const show = (i) => {
+    const show = i => {
       const g = items[i];
       if (!g) return;
       cur = i;
       lbImg.src = D.img(g.image);
       lbImg.srcset = D.srcset(g.image);
-      lbImg.sizes = '92vw';
-      lbImg.alt = g.alt;
-      lbCap.textContent = g.alt;
+      lbImg.sizes = '94vw';
+      lbImg.alt = D.alt(g.image);
+      lbCap.textContent = D.alt(g.image);
     };
-    const open = (i) => { show(i); lb.classList.add('is-open'); document.body.classList.add('is-locked'); $('.lightbox__close', lb).focus(); };
-    const close = () => { lb.classList.remove('is-open'); document.body.classList.remove('is-locked'); };
-    const move = (d) => {
+    const open = i => {
+      lastFocus = document.activeElement;
+      show(i);
+      lb.classList.add('is-open');
+      lb.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('is-locked');
+      $('.lightbox__close', lb).focus();
+    };
+    const close = () => {
+      lb.classList.remove('is-open');
+      lb.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('is-locked');
+      if (lastFocus) lastFocus.focus();
+    };
+    const move = d => {
       const v = visible();
       if (!v.length) return;
       const at = v.indexOf(cur);
@@ -266,126 +309,126 @@
     });
   }
 
-  /* ---------- ПРАВИЛА ТА FAQ ------------------------------ */
+  /* ---------- ПРАВИЛА ТА FAQ ------------------------------- */
   function rulesPage() {
     const box = $('#faqGroups');
     if (!box) return;
 
     box.innerHTML = (D.data.faqGroups || []).map((g, gi) => `
-      <section class="faq__group" data-reveal>
+      <section class="faq__group" id="g-${gi}" data-reveal>
         <h2 class="display d3" style="margin-bottom:1.2rem">${g.title}</h2>
-        <div class="faq__list">
+        <div class="acc">
           ${g.items.map((f, i) => `
-            <div class="faq__item">
-              <h3 style="margin:0">
-                <button class="faq__q" aria-expanded="false" aria-controls="fa-${gi}-${i}" id="fq-${gi}-${i}">
-                  <span>${f.q}</span><span class="faq__sign" aria-hidden="true"></span>
+            <div class="acc__item">
+              <h3>
+                <button class="acc__q" aria-expanded="false" aria-controls="fa-${gi}-${i}" id="fq-${gi}-${i}">
+                  <span>${f.q}</span><span class="acc__sign" aria-hidden="true"></span>
                 </button>
               </h3>
-              <div class="faq__a" id="fa-${gi}-${i}" role="region" aria-labelledby="fq-${gi}-${i}"><p>${f.a}</p></div>
+              <div class="acc__a" id="fa-${gi}-${i}" role="region" aria-labelledby="fq-${gi}-${i}"><p>${f.a}</p></div>
             </div>`).join('')}
         </div>
       </section>`).join('');
 
-    bindAccordion(box);
+    $$('.acc', box).forEach(list => D.bindAccordion(list));
+
+    const nav = $('#rulesNav');
+    if (nav) {
+      nav.innerHTML = (D.data.faqGroups || [])
+        .map((g, gi) => `<a href="#g-${gi}">${g.title}</a>`).join('');
+    }
 
     const pr = $('#poolRulesList');
-    if (pr) pr.innerHTML = D.data.pool.rules.map(r => `<li>${r}</li>`).join('');
+    if (pr) pr.innerHTML = (D.data.pool.rules || []).map(r => `<li>${r}</li>`).join('');
     const hr = $('#houseRulesList');
-    if (hr) hr.innerHTML = D.data.housePricing.rules.concat(D.data.housePricing.included).map(r => `<li>${r}</li>`).join('');
+    if (hr) {
+      hr.innerHTML = (D.data.housePricing.rules || [])
+        .concat(D.data.housePricing.included || [])
+        .map(r => `<li>${r}</li>`).join('');
+    }
   }
 
-  /* Акордеон — по одному відкритому в межах групи */
-  function bindAccordion(scope) {
-    $$('.faq__list', scope).forEach(list => {
-      $$('.faq__item', list).forEach(item => {
-        const btn = $('.faq__q', item);
-        const panel = $('.faq__a', item);
-        btn.addEventListener('click', () => {
-          const isOpen = item.classList.contains('is-open');
-          $$('.faq__item', list).forEach(o => {
-            o.classList.remove('is-open');
-            $('.faq__q', o).setAttribute('aria-expanded', 'false');
-            $('.faq__a', o).style.height = '0px';
-          });
-          if (!isOpen) {
-            item.classList.add('is-open');
-            btn.setAttribute('aria-expanded', 'true');
-            panel.style.height = panel.scrollHeight + 'px';
-          }
-        });
-      });
-    });
-  }
-
-  /* ---------- КАРТА + КОНТАКТИ ---------------------------- */
-  function mapBlock() {
-    const frame = $('#mapFrame');
-    if (frame) {
+  /* ---------- КОНТАКТИ ------------------------------------- */
+  function contactsPage() {
+    const frame = $('#cmap');
+    if (frame && !frame.dataset.done) {
+      frame.dataset.done = '1';
       frame.innerHTML = '<iframe title="Розташування SAP SAN на карті" loading="lazy" ' +
         'referrerpolicy="no-referrer-when-downgrade" allowfullscreen src="' + S.mapEmbed + '"></iframe>';
     }
-
     const route = $('#routeBtn');
     if (route) route.href = S.routeLink;
 
-    /* Мінімалістичний список: тонкі лінії-розділювачі замість карток у рамках */
     const list = $('#contactList');
-    if (list) {
+    if (list && !list.children.length) {
       list.innerHTML = `
-        <div class="contactm__row">
-          <dt>Телефон</dt>
-          <dd><a href="tel:${S.phoneHref}">${S.phone}</a><small>${S.hours}</small></dd>
-        </div>
-        <div class="contactm__row">
-          <dt>Instagram</dt>
-          <dd><a href="${S.instagram}" target="_blank" rel="noopener">${S.instagramLabel}</a></dd>
-        </div>
-        <div class="contactm__row">
-          <dt>Email</dt>
-          <dd><a href="mailto:${S.email}">${S.email}</a></dd>
-        </div>
-        <div class="contactm__row">
-          <dt>Адреса</dt>
-          <dd><a href="${S.mapLink}" target="_blank" rel="noopener">${S.address}</a><small>${S.addressFull}</small></dd>
-        </div>
-        <div class="contactm__row">
-          <dt>Заїзд · виїзд</dt>
-          <dd><span>з ${S.checkIn} · до ${S.checkOut}</span></dd>
-        </div>`;
+        <div class="crow"><dt>${I('phone')}Телефон</dt>
+          <dd><a class="link-u" href="tel:${S.phoneHref}">${S.phone}</a><small>${S.hours}</small></dd></div>
+        <div class="crow"><dt>${I('insta')}Instagram</dt>
+          <dd><a class="link-u" href="${S.instagram}" target="_blank" rel="noopener">${S.instagramLabel}</a></dd></div>
+        <div class="crow"><dt>${I('mail')}Email</dt>
+          <dd><a class="link-u" href="mailto:${S.email}">${S.email}</a></dd></div>
+        <div class="crow"><dt>${I('pin')}Адреса</dt>
+          <dd><a class="link-u" href="${S.mapLink}" target="_blank" rel="noopener">${S.address}</a>
+              <small>${S.addressFull}</small></dd></div>
+        <div class="crow"><dt>${I('clock')}Заїзд · виїзд</dt>
+          <dd><span>з ${S.checkIn} · до ${S.checkOut}</span></dd></div>`;
     }
 
-    /* Старий вузький блок — лишається сумісним, якщо десь ще використовується */
-    const info = $('#mapInfo');
-    if (info) {
-      info.innerHTML = `
-        <div class="contact-line"><b>Телефон</b><a href="tel:${S.phoneHref}">${S.phone}</a></div>
-        <div class="contact-line"><b>Instagram</b>
-          <a href="${S.instagram}" target="_blank" rel="noopener">${S.instagramLabel}</a></div>
-        <div class="contact-line"><b>Адреса</b>
-          <a href="${S.mapLink}" target="_blank" rel="noopener">${S.address}</a></div>
-        <div class="contact-line"><b>Графік роботи</b><span>${S.hours}</span></div>
-        <div style="display:flex;flex-wrap:wrap;gap:.8rem;margin-top:.5rem">
-          <a class="btn btn--primary" href="${S.routeLink}" target="_blank" rel="noopener">Прокласти маршрут ${ARROW}</a>
-          <a class="btn btn--ghost" href="booking.html">Забронювати</a>
-        </div>`;
+    const hours = $('#hoursList');
+    if (hours) {
+      hours.innerHTML = (S.hoursTable || []).map(r =>
+        `<div><span>${r.d}</span><span>${r.t}</span></div>`).join('');
     }
+
+    const menuLink = $('#menuLink');
+    if (menuLink) menuLink.href = S.menuUrl;
   }
 
-  /* ---------- BOOT ---------------------------------------- */
+  /* ---------- БІЧНА КАРТКА НА БРОНЮВАННІ ------------------- */
+  function bookingSide() {
+    const box = $('#bookingSide');
+    if (!box) return;
+    const pr = D.data.housePricing;
+    const p = D.data.pool;
+    box.innerHTML = `
+      <div class="bside__card">
+        <p class="label">Будиночок · за добу</p>
+        <dl class="rates">
+          <div class="rates__row"><dt><b>${pr.weekday.label}</b><span>${pr.weekday.note}</span></dt><dd>${P(pr.weekday.price)}</dd></div>
+          <div class="rates__row"><dt><b>${pr.weekend.label}</b><span>${pr.weekend.note}</span></dt><dd>${P(pr.weekend.price)}</dd></div>
+          <div class="rates__row"><dt><b>${pr.holiday.label}</b><span>${pr.holiday.note}</span></dt><dd>${P(pr.holiday.price)}</dd></div>
+        </dl>
+      </div>
+      <div class="bside__card">
+        <p class="label">Басейн · квиток</p>
+        <dl class="rates">
+          ${(p.tariffs || []).map(t => `
+            <div class="rates__row"><dt><b>${t.label}</b><span>${t.note}</span></dt><dd>${P(t.price)}</dd></div>`).join('')}
+        </dl>
+      </div>
+      <div class="bside__card">
+        <p class="label">Зв’язок</p>
+        <b>${S.phone}</b>
+        <p class="small mute">${S.hours}</p>
+        <div class="btns">
+          <a class="btn btn--ghost btn--sm" href="tel:${S.phoneHref}">Подзвонити</a>
+          <a class="btn btn--ghost btn--sm" href="${S.instagram}" target="_blank" rel="noopener">Instagram</a>
+        </div>
+      </div>`;
+  }
+
   function boot() {
-    advantages();
     housesList();
     houseDetail();
     poolPage();
     galleryPage();
     rulesPage();
-    mapBlock();
-    /* FAQ-акордеон на головній рендериться в app.js */
+    contactsPage();
+    bookingSide();
   }
 
-  /* Рендер стартує лише коли готові і DOM, і контент з API */
-  if (window.SAPSAN && window.SAPSAN.onReady) window.SAPSAN.onReady(boot);
+  if (D.onReady) D.onReady(boot);
   else if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
 })();

@@ -1,0 +1,19 @@
+{
+  "name": "sapsan-resort-site",
+  "version": "2.0.0",
+  "private": true,
+  "description": "SAP SAN Resort & Retreat — статичний сайт. npm-залежності потрібні лише для tools/ (обробка фото), сам сайт не має збірки.",
+  "scripts": {
+    "images": "node tools/build-images.js",
+    "serve": "node tools/serve.js",
+    "sharpness": "node tools/sharpness-scan.js",
+    "upscale": "node tools/ai-upscale.mjs"
+  },
+  "devDependencies": {
+    "@tensorflow/tfjs": "^4.11.0",
+    "@tensorflow/tfjs-backend-wasm": "^4.11.0",
+    "@upscalerjs/esrgan-medium": "^1.0.0",
+    "potrace": "^2.1.8",
+    "sharp": "^0.34.4"
+  }
+}

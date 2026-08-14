@@ -34,12 +34,27 @@
     const el = document.createElement('div');
     el.className = 'curtain__panel';
     const m = D.meta(h.hero) || { w: 1170, h: 780, ar: 1.5 };
+    /* 125vw, а не ширина вікна-панелі: фото тут живе в координатах
+       СЦЕНИ і завжди розтягнуте на всю її ширину (див. render()),
+       а бічні кадри зверху ще й масштабуються до 1.24. Якщо
+       оголосити sizes за видимою частиною кадру, браузер візьме
+       файл удвічі вужчий за реальний і панель буде мильною. */
+    const sizes = '125vw';
     el.innerHTML =
-      '<img src="' + D.img(h.hero) + '" srcset="' + D.srcset(h.hero) + '" ' +
-      'sizes="(max-width: 780px) 90vw, 55vw" ' +
-      'alt="' + h.name + ' — SAP SAN" ' +
-      /* Усі три кадри видно одночасно — lazy тут дав би сірі плями */
-      (i === 0 ? 'fetchpriority="high"' : 'fetchpriority="low"') + ' decoding="async">';
+      /* <picture> лише заради AVIF: позиціонує слайдер усе одно
+         сам <img>, який лишається єдиним елементом усередині.
+         draggable="false" — інакше натискання ПРЯМО на фото запускає
+         нативний HTML5 drag-and-drop браузера, який перехоплює жест
+         і глушить наступні pointermove: свайп «зависав», щойно палець
+         торкався самого зображення, а не порожньої частини сцени. */
+      '<picture>' +
+        '<source type="image/avif" srcset="' + D.srcset(h.hero, null, 'avif') + '" sizes="' + sizes + '">' +
+        '<source type="image/webp" srcset="' + D.srcset(h.hero, null, 'webp') + '" sizes="' + sizes + '">' +
+        '<img src="' + D.img(h.hero) + '" ' +
+        'alt="' + h.name + ' — SAP SAN" draggable="false" ' +
+        /* Усі три кадри видно одночасно — lazy тут дав би сірі плями */
+        (i === 0 ? 'fetchpriority="high"' : 'fetchpriority="low"') + ' decoding="async">' +
+      '</picture>';
     stage.appendChild(el);
     return { el, img: el.querySelector('img'), ar: m.ar || (m.w / m.h) };
   });
@@ -194,6 +209,7 @@
 
   /* ---------- 5. ПЕРЕХОДИ -------------------------------- */
   let animating = false;
+  let settleTween = null;
 
   function commit(dir) {
     index = ((index + dir) % N + N) % N;
@@ -206,36 +222,73 @@
     if (!hasGSAP || REDUCED) { progress = 0; if (dir) commit(dir); else render(); return; }
     animating = true;
     const o = { v: progress };
-    gsap.to(o, {
-      v: target, duration: 0.95, ease: 'power3.out',
+    settleTween = gsap.to(o, {
+      v: target, duration: 0.8, ease: 'power3.out',
       onUpdate() { progress = o.v; render(); },
-      onComplete() { animating = false; if (dir) commit(dir); else { progress = 0; render(); } }
+      onComplete() { animating = false; settleTween = null; if (dir) commit(dir); else { progress = 0; render(); } }
     });
   }
 
+  /* Перехопити доводку живим жестом.
+     Раніше pointerdown під час анімації просто ігнорувався — через це
+     перший клік «зʼїдався» і доводилось клікати двічі. Тепер дотик
+     миттєво вбиває твін і продовжує з поточної позиції. */
+  function interruptSettle() {
+    if (!animating) return;
+    if (settleTween) { settleTween.kill(); settleTween = null; }
+    animating = false;
+    /* progress лишається там, де його застав жест — без стрибка */
+  }
+
+  /* Для стрілок/крапок клік під час анімації не ігноруємо, а миттєво
+     доводимо поточний перехід до кінця (progress(1) тригерить commit),
+     після чого стартуємо наступний — клік ніколи не «зникає». */
+  function finishSettleNow() {
+    if (!animating) return;
+    if (settleTween) settleTween.progress(1);
+    animating = false; settleTween = null;
+  }
+
   function step(dir) {
-    if (animating) return;
+    finishSettleNow();
     settle(dir, dir);
   }
 
   function goTo(i) {
-    if (animating || i === index) return;
-    let d = wrapPos(i - index);
-    const dir = d > 0 ? 1 : -1;
-    /* послідовно доводимо крок за кроком для коротких відстаней */
-    step(dir);
+    finishSettleNow();
+    if (i === index) return;
+    const d = wrapPos(i - index);
+    step(d > 0 ? 1 : -1);
   }
 
   /* ---------- 6. DRAG / SWIPE ---------------------------- */
   let dragging = false, lockedAxis = null;
   let startX = 0, startY = 0, startProgress = 0, pid = null;
 
+  /* Друга лінія захисту: навіть якщо draggable/-webkit-user-drag
+     десь не спрацювали (старі Android WebView), явно глушимо
+     нативний drag-старт на будь-якому елементі всередині сцени. */
+  stage.addEventListener('dragstart', e => e.preventDefault());
+
   stage.addEventListener('pointerdown', e => {
-    if (animating || e.button === 1 || e.button === 2) return;
+    if (e.button === 1 || e.button === 2) return;
+    /* Якщо попередній жест не отримав pointerup/cancel (рідкісний збій
+       браузера), не даємо йому "заблокувати" наступний дотик —
+       завжди починаємо новий трек з чистого стану. */
+    if (dragging) { stage.classList.remove('is-dragging'); }
+    interruptSettle();              /* жест завжди має пріоритет над анімацією */
     dragging = true; lockedAxis = null;
     startX = e.clientX; startY = e.clientY;
     startProgress = progress; pid = e.pointerId;
     stage.classList.add('is-dragging');
+    /* Захоплюємо вказівник одразу, а не після визначення осі: інакше
+       перший mousedown прямо на <img> іноді встигав запустити нативний
+       "привид" перетягування/виділення ДО того, як лочилась вісь, і
+       жест "з'їдався" — доводилось хапати вдруге. Для тач-дотиків
+       капчур одразу не заважає вертикальному pan (за це відповідає
+       touch-action на stage), тож звужувати захоплення до lockedAxis==='x'
+       більше не потрібно. */
+    try { stage.setPointerCapture(pid); } catch (_) {}
   });
 
   stage.addEventListener('pointermove', e => {
@@ -245,9 +298,8 @@
 
     /* Визначаємо намір: горизонталь — слайдер, вертикаль — скрол */
     if (!lockedAxis) {
-      if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+      if (Math.abs(dx) < 4 && Math.abs(dy) < 4) return;
       lockedAxis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
-      if (lockedAxis === 'x') { try { stage.setPointerCapture(pid); } catch (_) {} }
     }
     if (lockedAxis !== 'x') return;
     e.preventDefault();

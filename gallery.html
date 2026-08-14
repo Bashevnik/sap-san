@@ -1,88 +1,110 @@
 <!doctype html>
-<html lang="uk">
+<html lang="uk" class="no-js">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Фотогалерея — SAP SAN Resort &amp; Retreat</title>
-<meta name="description" content="Фотографії території, будиночків A-frame, басейну, кухні та зони відпочинку SAP SAN.">
+<title>Галерея — SAP SAN Resort &amp; Retreat</title>
+<meta name="description" content="Реальні фотографії SAP SAN: будиночки A-frame на озері, басейн і шезлонги, шатра, тераси, інтер’єри та авторський бар.">
 <link rel="canonical" href="https://sapsan-resort.com.ua/gallery.html">
-<meta name="theme-color" content="#15140F">
+<meta name="theme-color" content="#0D1418">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="SAP SAN Resort &amp; Retreat">
-<meta property="og:title" content="Фотогалерея — SAP SAN Resort &amp; Retreat">
-<meta property="og:description" content="Фотографії території, будиночків A-frame, басейну, кухні та зони відпочинку SAP SAN.">
+<meta property="og:title" content="Галерея — SAP SAN">
+<meta property="og:description" content="Будиночки, басейн, шатра, тераси, бар — реальні кадри бази.">
 <meta property="og:locale" content="uk_UA">
-<meta property="og:image" content="images/cabana-lake-900.webp">
-<meta name="twitter:card" content="summary_large_image">
+<meta property="og:image" content="https://sapsan-resort.com.ua/images/cabana-lake-1600.webp">
+
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/sections.css">
-<link rel="stylesheet" href="css/pages.css">
-<link rel="stylesheet" href="css/redesign.css">
-<script>document.documentElement.classList.add('js');</script>
+<link rel="preload" as="font" type="font/woff2" href="assets/fonts/cormorant-garamond-cyrillic-normal-300.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="assets/fonts/jost-cyrillic-normal-300.woff2" crossorigin>
+<link rel="stylesheet" href="css/core.css?v=10">
+<link rel="stylesheet" href="css/decor.css?v=10">
+<link rel="stylesheet" href="css/pages.css?v=10">
+<script>document.documentElement.className = 'js';</script>
 </head>
 <body>
 <a class="skip-link" href="#main">Перейти до вмісту</a>
 <header class="header" id="header"></header>
-<div class="menu" id="menu" aria-hidden="true"></div>
+<div class="menu" id="menu" aria-hidden="true" tabindex="-1"></div>
 
-<section class="page-hero">
-  <div class="page-hero__media">
-    <img src="images/cabana-lake-900.webp" srcset="images/cabana-lake-640.webp 640w, images/cabana-lake-900.webp 900w" sizes="100vw" width="900" height="1600" fetchpriority="high" decoding="async" alt="Шатро біля води на території SAP SAN">
+<main id="main">
+
+<section class="phero">
+  <div class="phero__media">
+    <picture>
+      <source media="(max-width: 760px)" type="image/avif" srcset="images/cabana-lake-p-640.avif 640w, images/cabana-lake-p-960.avif 960w, images/cabana-lake-p-1280.avif 1280w" sizes="100vw">
+      <source media="(max-width: 760px)" type="image/webp" srcset="images/cabana-lake-p-640.webp 640w, images/cabana-lake-p-960.webp 960w, images/cabana-lake-p-1280.webp 1280w" sizes="100vw">
+      <source type="image/avif" srcset="images/cabana-lake-960.avif 960w, images/cabana-lake-1600.avif 1600w, images/cabana-lake-2560.avif 2560w" sizes="100vw">
+      <source type="image/webp" srcset="images/cabana-lake-960.webp 960w, images/cabana-lake-1600.webp 1600w, images/cabana-lake-2560.webp 2560w" sizes="100vw">
+      <img src="images/cabana-lake-1600.webp" width="3200" height="1800" style="--fx:50%;--fy:55%"
+           fetchpriority="high" decoding="async"
+           alt="Стіл під парасолькою на терасі біля води, поруч штори шатра">
+    </picture>
   </div>
-  <div class="page-hero__body wrap">
-    <nav class="crumbs" aria-label="Хлібні крихти"><a href="index.html">Головна</a><span>/</span><span aria-current="page">Галерея</span></nav>
-    <p class="eyebrow" style="margin-top:1rem;color:var(--gold-soft)">Галерея</p>
-    <h1>Як це виглядає насправді</h1>
-    <p class="lead">Усі фотографії зроблені на території SAP SAN.</p>
+  <div class="phero__body wrap">
+    <nav class="crumbs" aria-label="Хлібні крихти">
+      <a href="index.html">Головна</a><span>/</span><span aria-current="page">Галерея</span>
+    </nav>
+    <p class="label" style="color:rgba(242,240,233,.78)">Галерея</p>
+    <h1 class="display d1 phero__title">Як це виглядає насправді</h1>
+    <p class="lead phero__lead">Жодних рендерів і стоку — тільки те, що знято на самій базі.</p>
   </div>
 </section>
-<main id="main">
-  <section class="section surface-ivory">
-    <div class="wrap">
-      <div class="gfilter" id="gfilter" role="group" aria-label="Фільтр галереї"></div>
-      <div class="ggrid" id="ggrid" style="margin-top:clamp(1.8rem,4vh,2.6rem)"></div>
+
+<section class="section on-paper">
+  <div class="wrap">
+    <div class="gfilter" id="gfilter" role="group" aria-label="Фільтр галереї" data-reveal></div>
+    <div class="ggrid" id="ggrid" style="margin-top:clamp(1.6rem,4vh,2.4rem)"></div>
+  </div>
+</section>
+
+<section class="section on-linen">
+  <div class="wrap" style="text-align:center;display:grid;justify-items:center;gap:1.4rem">
+    <div class="rule-bird" style="width:min(460px,80vw)" aria-hidden="true"></div>
+    <h2 class="display d2" data-split style="max-width:16ch">Побачити наживо краще, ніж на фото</h2>
+    <div class="btns" data-reveal>
+      <a class="btn" href="booking.html">Забронювати
+        <svg class="btn__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18M14.4 5.4 21 12l-6.6 6.6"/></svg>
+      </a>
+      <a class="btn btn--ghost" href="contacts.html">Як доїхати</a>
     </div>
-  </section>
+  </div>
+</section>
+
 </main>
 
-<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Перегляд фотографії">
+<!-- Лайтбокс -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Перегляд фотографії" aria-hidden="true">
   <button class="lightbox__close" type="button" aria-label="Закрити">
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16"><path d="M3 3l10 10M13 3L3 13"/></svg>
+    <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" aria-hidden="true"><path d="M5.6 5.6 18.4 18.4M18.4 5.6 5.6 18.4"/></svg>
   </button>
   <button class="lightbox__nav lightbox__nav--prev" type="button" aria-label="Попереднє фото">
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M14 8H2M7 3L2 8l5 5"/></svg>
+    <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12H3M9.6 5.4 3 12l6.6 6.6"/></svg>
   </button>
   <button class="lightbox__nav lightbox__nav--next" type="button" aria-label="Наступне фото">
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 8h12M9 3l5 5-5 5"/></svg>
+    <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18M14.4 5.4 21 12l-6.6 6.6"/></svg>
   </button>
   <div>
-    <img src="" alt="">
+    <!-- Прозорий 1×1 як заглушка: справжній src проставляє
+         js/pages.js при відкритті. Порожній або відсутній src
+         браузер рахує за невдале завантаження. -->
+    <img alt="" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">
     <p class="lightbox__cap"></p>
   </div>
 </div>
-<section class="section section--tight surface-ink">
-  <div class="wrap ctabar">
-    <div class="ctabar__text">
-      <h2 class="display d2">Хочете побачити наживо?</h2>
-      <p class="lead" style="margin-top:.8rem">Залиште заявку на будиночок або шезлонги — і приїздіть.</p>
-    </div>
-    <div class="ctabar__actions">
-      <a class="btn btn--primary" href="booking.html">Забронювати</a>
-      <a class="btn btn--ghost" href="houses.html">Будиночки</a>
-    </div>
-  </div>
-</section>
-<footer class="footer surface-ink" id="footer"></footer>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
-<script src="js/images.js" defer></script>
-<script src="js/data.js" defer></script>
-<script src="js/chrome.js" defer></script>
-<script src="js/pages.js" defer></script>
-<script src="js/reveal.js" defer></script>
+
+<footer class="footer on-ink" id="footer"></footer>
+
+<script src="js/vendor/gsap.min.js" defer></script>
+<script src="js/vendor/ScrollTrigger.min.js" defer></script>
+<script src="js/vendor/lax.min.js" defer></script>
+<script src="js/config.js?v=10" defer></script>
+<script src="js/images.js?v=10" defer></script>
+<script src="js/falcon.js?v=10" defer></script>
+<script src="js/data.js?v=10" defer></script>
+<script src="js/brand.js?v=10" defer></script>
+<script src="js/chrome.js?v=10" defer></script>
+<script src="js/pages.js?v=10" defer></script>
+<script src="js/motion.js?v=10" defer></script>
 </body>
 </html>

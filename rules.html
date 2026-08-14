@@ -1,84 +1,104 @@
 <!doctype html>
-<html lang="uk">
+<html lang="uk" class="no-js">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Правила та часті питання — SAP SAN Resort &amp; Retreat</title>
-<meta name="description" content="Правила SAP SAN: оплата та передоплата, скасування, заїзд і виїзд, діти, тварини, правила басейну. Відповіді на часті питання.">
+<meta name="description" content="Правила SAP SAN: бронювання й передоплата, заїзд з 14:00 та виїзд до 12:00, скасування, діти, тварини, правила басейну та шезлонгів.">
 <link rel="canonical" href="https://sapsan-resort.com.ua/rules.html">
-<meta name="theme-color" content="#15140F">
+<meta name="theme-color" content="#0D1418">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="SAP SAN Resort &amp; Retreat">
-<meta property="og:title" content="Правила та часті питання — SAP SAN Resort &amp; Retreat">
-<meta property="og:description" content="Правила SAP SAN: оплата та передоплата, скасування, заїзд і виїзд, діти, тварини, правила басейну. Відповіді на часті питання.">
+<meta property="og:title" content="Правила та FAQ — SAP SAN">
+<meta property="og:description" content="Бронювання, заїзд і виїзд, діти, тварини, басейн.">
 <meta property="og:locale" content="uk_UA">
-<meta property="og:image" content="images/terrace-rope-view-1169.webp">
-<meta name="twitter:card" content="summary_large_image">
+<meta property="og:image" content="https://sapsan-resort.com.ua/images/terrace-lakeview-1600.webp">
+
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/sections.css">
-<link rel="stylesheet" href="css/pages.css">
-<link rel="stylesheet" href="css/redesign.css">
-<script>document.documentElement.classList.add('js');</script>
+<link rel="preload" as="font" type="font/woff2" href="assets/fonts/cormorant-garamond-cyrillic-normal-300.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="assets/fonts/jost-cyrillic-normal-300.woff2" crossorigin>
+<link rel="stylesheet" href="css/core.css?v=10">
+<link rel="stylesheet" href="css/decor.css?v=10">
+<link rel="stylesheet" href="css/home.css?v=10">
+<link rel="stylesheet" href="css/pages.css?v=10">
+<script>document.documentElement.className = 'js';</script>
 </head>
 <body>
 <a class="skip-link" href="#main">Перейти до вмісту</a>
 <header class="header" id="header"></header>
-<div class="menu" id="menu" aria-hidden="true"></div>
+<div class="menu" id="menu" aria-hidden="true" tabindex="-1"></div>
 
-<section class="page-hero">
-  <div class="page-hero__media">
-    <img src="images/terrace-rope-view-1169.webp" srcset="images/terrace-rope-view-640.webp 640w, images/terrace-rope-view-1000.webp 1000w, images/terrace-rope-view-1169.webp 1169w" sizes="100vw" width="1169" height="1935" fetchpriority="high" decoding="async" alt="Вид з тераси SAP SAN на озеро">
-  </div>
-  <div class="page-hero__body wrap">
-    <nav class="crumbs" aria-label="Хлібні крихти"><a href="index.html">Головна</a><span>/</span><span aria-current="page">Правила</span></nav>
-    <p class="eyebrow" style="margin-top:1rem;color:var(--gold-soft)">Правила та FAQ</p>
-    <h1>Коротко про головне</h1>
-    <p class="lead">Оплата, скасування, заїзд і виїзд, діти, тварини та правила басейну.</p>
-  </div>
-</section>
 <main id="main">
-  <section class="section surface-ivory">
-    <div class="wrap" style="display:grid;gap:clamp(2.5rem,6vh,4rem)" id="faqGroups"></div>
-  </section>
 
-  <section class="section surface-sand">
-    <div class="wrap" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:clamp(2rem,5vw,4rem)">
-      <div data-reveal>
-        <p class="eyebrow">Будиночки</p>
-        <h2 class="display d3" style="margin:.6rem 0 1.2rem">Правила проживання</h2>
-        <ul class="rules-list" id="houseRulesList"></ul>
+<section class="phero" style="min-height:clamp(340px,48vh,520px)">
+  <div class="phero__media">
+    <picture>
+      <source media="(max-width: 760px)" type="image/avif" srcset="images/terrace-lakeview-p-640.avif 640w, images/terrace-lakeview-p-960.avif 960w, images/terrace-lakeview-p-1280.avif 1280w" sizes="100vw">
+      <source media="(max-width: 760px)" type="image/webp" srcset="images/terrace-lakeview-p-640.webp 640w, images/terrace-lakeview-p-960.webp 960w, images/terrace-lakeview-p-1280.webp 1280w" sizes="100vw">
+      <source type="image/avif" srcset="images/terrace-lakeview-960.avif 960w, images/terrace-lakeview-1600.avif 1600w, images/terrace-lakeview-2560.avif 2560w" sizes="100vw">
+      <source type="image/webp" srcset="images/terrace-lakeview-960.webp 960w, images/terrace-lakeview-1600.webp 1600w, images/terrace-lakeview-2560.webp 2560w" sizes="100vw">
+      <img src="images/terrace-lakeview-1600.webp" width="3200" height="1800" style="--fx:45%;--fy:50%"
+           fetchpriority="high" decoding="async"
+           alt="Вид на озеро з тераси будиночка крізь відчинені двері">
+    </picture>
+  </div>
+  <div class="phero__body wrap">
+    <nav class="crumbs" aria-label="Хлібні крихти">
+      <a href="index.html">Головна</a><span>/</span><span aria-current="page">Правила</span>
+    </nav>
+    <p class="label" style="color:rgba(242,240,233,.78)">Гостям</p>
+    <h1 class="display d1 phero__title">Правила та часті питання</h1>
+  </div>
+</section>
+
+<section class="section on-paper">
+  <div class="wrap rules__grid">
+    <nav class="rules__nav" id="rulesNav" aria-label="Розділи правил"></nav>
+    <div id="faqGroups"></div>
+  </div>
+</section>
+
+<section class="section on-linen">
+  <div class="wrap">
+    <div class="grid">
+      <div class="col-l6" data-reveal>
+        <p class="label" style="margin-bottom:1.2rem">Проживання</p>
+        <h2 class="display d3" style="margin-bottom:1.2rem">Будиночок</h2>
+        <ul class="tri-list" id="houseRulesList"></ul>
       </div>
-      <div data-reveal>
-        <p class="eyebrow">Басейн</p>
-        <h2 class="display d3" style="margin:.6rem 0 1.2rem">Правила відвідування</h2>
-        <ul class="rules-list" id="poolRulesList"></ul>
+      <div class="col-r6" data-reveal="0.08">
+        <p class="label" style="margin-bottom:1.2rem">Відпочинок</p>
+        <h2 class="display d3" style="margin-bottom:1.2rem">Басейн і шезлонги</h2>
+        <ul class="tri-list" id="poolRulesList"></ul>
       </div>
     </div>
-  </section>
-</main>
-<section class="section section--tight surface-ink">
-  <div class="wrap ctabar">
-    <div class="ctabar__text">
-      <h2 class="display d2">Не знайшли відповідь?</h2>
-      <p class="lead" style="margin-top:.8rem">Зателефонуйте — підкажемо все про бронювання, ціни та умови.</p>
-    </div>
-    <div class="ctabar__actions">
-      <a class="btn btn--primary" href="tel:+380980938099">098 093 80 99</a>
-      <a class="btn btn--ghost" href="booking.html">Залишити заявку</a>
+
+    <div class="rule-bird" style="margin-top:clamp(3rem,8vh,5rem)" aria-hidden="true"></div>
+
+    <div style="margin-top:clamp(2rem,5vh,3rem);display:grid;gap:1rem;justify-items:center;text-align:center">
+      <p class="lead" data-reveal style="max-width:52ch">Не знайшли відповідь? Зателефонуйте — адміністратор підкаже за хвилину.</p>
+      <div class="btns" data-reveal="0.08">
+        <a class="btn" href="booking.html">Залишити заявку</a>
+        <a class="btn btn--ghost" href="contacts.html">Контакти</a>
+      </div>
     </div>
   </div>
 </section>
-<footer class="footer surface-ink" id="footer"></footer>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
-<script src="js/images.js" defer></script>
-<script src="js/data.js" defer></script>
-<script src="js/chrome.js" defer></script>
-<script src="js/pages.js" defer></script>
-<script src="js/reveal.js" defer></script>
+
+</main>
+
+<footer class="footer on-ink" id="footer"></footer>
+
+<script src="js/vendor/gsap.min.js" defer></script>
+<script src="js/vendor/ScrollTrigger.min.js" defer></script>
+<script src="js/vendor/lax.min.js" defer></script>
+<script src="js/config.js?v=10" defer></script>
+<script src="js/images.js?v=10" defer></script>
+<script src="js/falcon.js?v=10" defer></script>
+<script src="js/data.js?v=10" defer></script>
+<script src="js/brand.js?v=10" defer></script>
+<script src="js/chrome.js?v=10" defer></script>
+<script src="js/pages.js?v=10" defer></script>
+<script src="js/motion.js?v=10" defer></script>
 </body>
 </html>
