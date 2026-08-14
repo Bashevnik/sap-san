@@ -196,14 +196,49 @@
     let active = 0;
 
     /* Пінимо не всю секцію (з заголовком і паддінгами), а лише
-       обгортку хаба й перемикачів — інакше на звичайному
-       ноутбучному екрані блок вище за viewport і застигла
-       версія просто обрізається знизу. Пінити можна, лише коли
-       ця вужча ділянка влазить у екран: на короткому вікні —
-       той самий cycle-фолбек, що й без ScrollTrigger. */
+       обгортку хаба й перемикачів, розтягнуту на весь екран
+       (.story__pin), щоб іконка стояла точно по центру, а не
+       притиснутою до верху під шапкою. Пінити можна, лише коли
+       сам вміст (коло + текст + підписи) влазить під висоту
+       екрана: на короткому вікні — той самий cycle-фолбек, що
+       й без ScrollTrigger. */
     const STORY_PIN_ENABLED = true;
     const pinTarget = $('#storyPin');
-    const fitsViewport = !!pinTarget && pinTarget.offsetHeight <= window.innerHeight * .96;
+    const headerEl = $('.header');
+    const hub = $('#chapterHub');
+
+    /* Базовий padding-top (--header-h) лише звільняє місце під
+       шапку. Точний відступ, що ставить ЦЕНТР кола рівно на
+       середину вільної висоти, рахуємо тут: тексту й підписів
+       під колом завжди більше, ніж нічого над ним, тож звичайне
+       flex-центрування всієї групи тягне коло вище за центр. */
+    const centerRing = () => {
+      if (!headerEl) return;
+      const headerH = headerEl.offsetHeight;
+      document.documentElement.style.setProperty('--header-h', headerH + 'px');
+      if (!pinTarget || !ring) return;
+      pinTarget.style.paddingTop = headerH + 'px';
+      const availH = window.innerHeight - headerH;
+      const pinRect = pinTarget.getBoundingClientRect();
+      const ringRect = ring.getBoundingClientRect();
+      const currentPad = headerH;
+      const ringOffset = (ringRect.top - pinRect.top) + ringRect.height / 2;
+      const wantShift = (headerH + availH / 2) - ringOffset;
+      /* Підписи-перемикачі мають лишатися видимими цілком —
+         центрування кола не може виштовхнути їх за нижній край
+         екрана. Тому зсув униз обмежений тим, скільки вільного
+         місця лишається під підписами при базовому відступі. */
+      const tabsBottom = tabs ? tabs.getBoundingClientRect().bottom - pinRect.top : ringOffset;
+      const maxShift = Math.max(0, (headerH + availH) - tabsBottom);
+      const shift = Math.max(0, Math.min(wantShift, maxShift));
+      pinTarget.style.paddingTop = (currentPad + shift) + 'px';
+    };
+    centerRing();
+    window.addEventListener('resize', centerRing);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(centerRing);
+
+    const contentH = (hub ? hub.offsetHeight : 0) + (tabs ? tabs.offsetHeight : 0) + 96;
+    const fitsViewport = contentH <= window.innerHeight * .94;
     const canPin = STORY_PIN_ENABLED && hasGSAP && window.ScrollTrigger && pinTarget && !REDUCED && data.length > 1 && fitsViewport;
 
     if (canPin) {
