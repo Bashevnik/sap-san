@@ -224,18 +224,22 @@
       const currentPad = headerH;
       const ringOffset = (ringRect.top - pinRect.top) + ringRect.height / 2;
       const wantShift = (headerH + availH / 2) - ringOffset;
-      /* Підписи-перемикачі мають лишатися видимими цілком —
-         центрування кола не може виштовхнути їх за нижній край
-         екрана. Тому зсув униз обмежений тим, скільки вільного
-         місця лишається під підписами при базовому відступі. */
+      /* Підписи-перемикачі мають лишатися видимими цілком, з
+         запасом знизу — центрування кола не може притиснути їх
+         впритул до нижнього краю екрана (там вони виглядають
+         обрізаними, навіть якщо технічно ще влазять). Тому зсув
+         униз обмежений тим, скільки вільного місця лишається під
+         підписами при базовому відступі, мінус цей запас. */
+      const BOTTOM_SAFE = 28;
       const tabsBottom = tabs ? tabs.getBoundingClientRect().bottom - pinRect.top : ringOffset;
-      const maxShift = Math.max(0, (headerH + availH) - tabsBottom);
+      const maxShift = Math.max(0, (headerH + availH) - tabsBottom - BOTTOM_SAFE);
       const shift = Math.max(0, Math.min(wantShift, maxShift));
       pinTarget.style.paddingTop = (currentPad + shift) + 'px';
     };
     centerRing();
     window.addEventListener('resize', centerRing);
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(centerRing);
+    window.addEventListener('load', centerRing);
 
     const contentH = (hub ? hub.offsetHeight : 0) + (tabs ? tabs.offsetHeight : 0) + 96;
     const fitsViewport = contentH <= window.innerHeight * .94;
