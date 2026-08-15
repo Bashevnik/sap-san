@@ -19,6 +19,18 @@
   const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const hasGSAP = typeof window.gsap !== 'undefined';
 
+  /* Мобільний Safari/Chrome ховає й показує адресний рядок під
+     час скролу — це теж 'resize', але тільки за висотою. Якщо
+     перераховувати layout на кожен такий кадр, пінг-секції
+     смикаються посеред скролу. Реагуємо лише на зміну ширини
+     (реальний ресайз вікна чи поворот екрана). */
+  let lastWidth = window.innerWidth;
+  const onWidthResize = fn => window.addEventListener('resize', () => {
+    if (window.innerWidth === lastWidth) return;
+    lastWidth = window.innerWidth;
+    fn();
+  });
+
   /* ---------- 1. ЩО ТУТ Є ---------------------------------
      Не сітка однакових карток, а нумерований перелік із
      тонкими лініями: читається як зміст книги, а не як
@@ -175,12 +187,11 @@
        висоту контейнера в px, інакше довший текст наїжджає
        на підписи знизу. */
     const fitHeight = () => {
+      hubtext.style.minHeight = '0px';
       const h = Math.max(0, ...hubstepEls.map(s => s.offsetHeight));
       if (h) hubtext.style.minHeight = h + 'px';
     };
     fitHeight();
-    window.addEventListener('resize', fitHeight);
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitHeight);
 
     const setActive = i => {
       badgeEls.forEach((s, k) => s.classList.toggle('is-active', k === i));
@@ -213,15 +224,13 @@
        під колом завжди більше, ніж нічого над ним, тож звичайне
        flex-центрування всієї групи тягне коло вище за центр. */
     const centerRing = () => {
-      if (!headerEl) return;
+      if (!headerEl || !pinTarget || !ring) return;
       const headerH = headerEl.offsetHeight;
       document.documentElement.style.setProperty('--header-h', headerH + 'px');
-      if (!pinTarget || !ring) return;
       pinTarget.style.paddingTop = headerH + 'px';
       const availH = window.innerHeight - headerH;
       const pinRect = pinTarget.getBoundingClientRect();
       const ringRect = ring.getBoundingClientRect();
-      const currentPad = headerH;
       const ringOffset = (ringRect.top - pinRect.top) + ringRect.height / 2;
       const wantShift = (headerH + availH / 2) - ringOffset;
       /* Підписи-перемикачі мають лишатися видимими цілком, з
@@ -234,58 +243,73 @@
       const tabsBottom = tabs ? tabs.getBoundingClientRect().bottom - pinRect.top : ringOffset;
       const maxShift = Math.max(0, (headerH + availH) - tabsBottom - BOTTOM_SAFE);
       const shift = Math.max(0, Math.min(wantShift, maxShift));
-      pinTarget.style.paddingTop = (currentPad + shift) + 'px';
+      pinTarget.style.paddingTop = (headerH + shift) + 'px';
     };
-    centerRing();
-    window.addEventListener('resize', centerRing);
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(centerRing);
-    window.addEventListener('load', centerRing);
 
-    const contentH = (hub ? hub.offsetHeight : 0) + (tabs ? tabs.offsetHeight : 0) + 96;
-    const fitsViewport = contentH <= window.innerHeight * .94;
-    const canPin = STORY_PIN_ENABLED && hasGSAP && window.ScrollTrigger && pinTarget && !REDUCED && data.length > 1 && fitsViewport;
+    /* st.kill() відкочує пінгований елемент до інлайн-стилів, що
+       були на момент СТВОРЕННЯ того інстансу пінгу — тобто якщо
+       перебудувати пін після того, як centerRing уже змінив
+       padding-top, kill() поверне старий (доpinговий) відступ і
+       зведе перерахунок нанівець. Тому міряємо й пінимо РІВНО
+       ОДИН РАЗ, дочекавшись підміни шрифту (це і є джерело різних
+       вимірів «до» і «після»), а не по кілька разів поспіль. */
+    let st;
+    const build = () => {
+      if (st) st.kill();
+      st = ScrollTrigger.create({
+        trigger: pinTarget, start: 'top top',
+        end: () => '+=' + (data.length - 1) * Math.max(window.innerHeight * .8, 480),
+        pin: true, anticipatePin: 1, scrub: .35,
+        snap: { snapTo: 1 / (data.length - 1), duration: .35, ease: 'power1.inOut' },
+        onUpdate(self) {
+          const i = Math.min(data.length - 1, Math.round(self.progress * (data.length - 1)));
+          if (i !== active) { active = i; setActive(i); }
+        }
+      });
+    };
 
-    if (canPin) {
-      /* Блок «прилипає» на час прокрутки одного екрана на крок:
-         гість гортає — крок за кроком бачить усі стани, і тільки
-         після останнього сторінка їде далі. На відміну від
-         старого sticky (CSS), ScrollTrigger керує самим скролом,
-         тому працює однаково на десктопі й на тач — це і було
-         проблемою першої версії блоку. */
-      let st;
-      const build = () => {
-        if (st) st.kill();
-        st = ScrollTrigger.create({
-          trigger: pinTarget, start: 'top top',
-          end: () => '+=' + (data.length - 1) * Math.max(window.innerHeight * .8, 480),
-          pin: true, anticipatePin: 1, scrub: .35,
-          snap: { snapTo: 1 / (data.length - 1), duration: .35, ease: 'power1.inOut' },
-          onUpdate(self) {
-            const i = Math.min(data.length - 1, Math.round(self.progress * (data.length - 1)));
-            if (i !== active) { active = i; setActive(i); }
-          }
-        });
-      };
-      build();
-      window.addEventListener('resize', () => ScrollTrigger.refresh());
-    } else if (STORY_PIN_ENABLED) {
-      /* Без ScrollTrigger (reduced-motion, старий браузер) —
-         той самий принцип, що й у «Напрямках»: кроки самі
-         гортаються по колу, поки гість не навів курсор. */
-      let cycleTimer = null;
-      const stopCycle = () => { if (cycleTimer) { clearInterval(cycleTimer); cycleTimer = null; } };
-      const startCycle = () => {
-        if (isTouch() || REDUCED || data.length < 2) return;
-        stopCycle();
-        cycleTimer = setInterval(() => { active = (active + 1) % data.length; setActive(active); }, 3200);
-      };
-      startCycle();
-      tabs.addEventListener('mouseleave', startCycle);
-      tabEls.forEach(tab => tab.addEventListener('mouseenter', stopCycle));
-    }
-    /* STORY_PIN_ENABLED=false: без автопрокрутки й без пінінгу —
-       статичний перший крок, перемикання лише наведенням/тапом/
-       кліком по підписах нижче. */
+    const layout = () => {
+      fitHeight();
+      centerRing();
+      const contentH = (hub ? hub.offsetHeight : 0) + (tabs ? tabs.offsetHeight : 0) + 48;
+      const fitsViewport = contentH <= window.innerHeight * .96;
+      const canPin = STORY_PIN_ENABLED && hasGSAP && window.ScrollTrigger && pinTarget && !REDUCED && data.length > 1 && fitsViewport;
+      if (canPin) {
+        build();
+      } else if (st) {
+        st.kill();
+        st = null;
+      }
+      return canPin;
+    };
+
+    /* Шрифт (Cormorant/Jost) підвантажується асинхронно й міняє
+       метрику рядків — якщо виміряти й запінити ДО підміни,
+       висота підписів «зрушиться» вже під час активного пінгу.
+       Тому початкове вимірювання й побудова пінгу чекають на
+       document.fonts.ready — один надійний прохід замість
+       вимірювання-до/перевимірювання-після навколо гонки. */
+    const setup = () => {
+      const canPin = layout();
+      if (!canPin && STORY_PIN_ENABLED) {
+        /* Без пінгу (короткий екран або reduced-motion) — той
+           самий принцип, що й у «Напрямках»: кроки самі
+           гортаються по колу, поки гість не навів курсор. */
+        let cycleTimer = null;
+        const stopCycle = () => { if (cycleTimer) { clearInterval(cycleTimer); cycleTimer = null; } };
+        const startCycle = () => {
+          if (isTouch() || REDUCED || data.length < 2) return;
+          stopCycle();
+          cycleTimer = setInterval(() => { active = (active + 1) % data.length; setActive(active); }, 3200);
+        };
+        startCycle();
+        tabs.addEventListener('mouseleave', startCycle);
+        tabEls.forEach(tab => tab.addEventListener('mouseenter', stopCycle));
+      }
+    };
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(setup);
+    else setup();
+    onWidthResize(layout);
 
     tabEls.forEach((tab, i) => {
       const activate = () => { active = i; setActive(i); };

@@ -30,6 +30,12 @@
   const $$ = (s, c) => Array.from((c || document).querySelectorAll(s));
 
   if (hasGSAP && window.ScrollTrigger) gsap.registerPlugin(ScrollTrigger);
+  /* На iOS/Android адресний рядок ховається й з'являється під
+     час скролу, змінюючи window.innerHeight на льоту — pin
+     (застосований у секції «Один день») тоді сіпається й іноді
+     «відпускає» скрол посеред кроку. normalizeScroll — офіційний
+     фікс GSAP саме під цю мобільну поведінку. */
+  if (hasGSAP && window.ScrollTrigger && !REDUCED) ScrollTrigger.normalizeScroll(true);
 
   /* ---------- 1. ЗАГОЛОВОК ПО РЯДКАХ ------------------------
      Ділимо на слова, вимірюємо, збираємо назад у маски рядків.

@@ -1069,6 +1069,23 @@
   border-color: var(--foam);
 }
 
+/* На невисоких телефонах (iPhone SE й подібні) повний блок —
+   коло + текст + підписи — не влазив у висоту екрана, тому
+   пінг вимикався фолбеком (js/home.js: fitsViewport). Компактніша
+   версія кола й відступів звільняє достатньо місця, щоб пінг
+   працював і на маленьких екранах теж. */
+@media (max-width: 600px) {
+  .story__ring { width: clamp(150px, 42vw, 210px); }
+  .story__hubtext { margin-top: clamp(1.2rem, 3.4vh, 2rem); }
+  .story__meta { margin-bottom: .4rem; }
+  .story__tag { margin-top: .4rem; }
+  .story__text { margin-top: 1rem; }
+  .story__tabs {
+    margin-top: clamp(1.2rem, 3.4vh, 2rem);
+    padding-top: clamp(.9rem, 2.4vh, 1.3rem);
+  }
+}
+
 /* ============ 9 · КУХНЯ І БАР ============================= */
 .kit__head {
   display: grid;
