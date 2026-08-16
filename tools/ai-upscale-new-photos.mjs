@@ -28,10 +28,9 @@ const OVERLAP = 32;
 /* Тільки 'wide'/'hero'-роль слагів — 'mid' (макс 1600) достатньо
    близько до вихідних 1280, плаский lanczos там не помітний. */
 const TARGETS = [
-  '01_pool_terrace.png',          // pool-deck (hero)
-  '02_lake_terrace.png',          // cabana-lake (hero)
-  '05_pool_panorama.png',         // pool-still (hero)
-  '07_pool_cabana.png'            // pool-cabanas (hero)
+  '08_pool_lake_view.png',        // cabana-white (hero)
+  '09_pool_panorama.png',         // pool-lake (wide)
+  '06_pool_terrace_wide.png'      // pool-forest (hero)
 ];
 
 function nodeFileIO(dir) {
