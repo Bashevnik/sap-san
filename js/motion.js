@@ -118,19 +118,23 @@
           /* Дочекатися контенту — і тільки тоді відкривати */
           ready.then(() => {
             gsap.timeline({ onComplete() { finish(); resolve(); } })
-              .to($('.preloader__inner', el), { opacity: 0, duration: .45, ease: 'power2.in' })
-              .to(el, { clipPath: 'inset(0 0 100% 0)', duration: 1.05, ease: 'power4.inOut' }, '-=.15');
+              .to($('.preloader__inner', el), { opacity: 0, duration: .3, ease: 'power2.in' })
+              .to(el, { clipPath: 'inset(0 0 100% 0)', duration: .6, ease: 'power4.inOut' }, '-=.15');
           });
         }
       });
 
+      /* Коротка версія: той самий рух (сокіл → слово → підпис →
+         смужка), стиснутий десь удвічі — застава має встигнути
+         зникнути, поки сторінка ще довантажується, а не тримати
+         гостя на екрані заради самої анімації. */
       intro.set(el, { autoAlpha: 1 })
         .fromTo($('.preloader__bird', el),
           { opacity: 0, scaleX: 0.16, transformOrigin: '50% 50%' },
-          { opacity: .95, scaleX: 1, duration: 1.5, ease: 'power3.out' })
-        .from($('.preloader__word', el), { y: 14, opacity: 0, duration: .9, ease: 'power2.out' }, '-=.55')
-        .from($('.preloader__sub', el), { opacity: 0, duration: .8, ease: 'none' }, '-=.5')
-        .to($('#preloaderFill'), { scaleX: 1, duration: 1.1, ease: 'power2.inOut' }, '-=1.1');
+          { opacity: .95, scaleX: 1, duration: .85, ease: 'power3.out' })
+        .from($('.preloader__word', el), { y: 14, opacity: 0, duration: .55, ease: 'power2.out' }, '-=.35')
+        .from($('.preloader__sub', el), { opacity: 0, duration: .5, ease: 'none' }, '-=.3')
+        .to($('#preloaderFill'), { scaleX: 1, duration: .7, ease: 'power2.inOut' }, '-=.7');
     });
   }
 
@@ -165,7 +169,29 @@
     if (t.bits.length)  tl.to(t.bits, { opacity: 1, y: 0, duration: 1.1, ease: 'power3.out', stagger: .11 }, .6);
   }
 
-  /* ---------- 4. ПОЯВА ПРИ ПРОКРУТЦІ ------------------------- */
+  /* ---------- 4. ПОЯВА ПРИ ПРОКРУТЦІ -------------------------
+     Розбито на дві фази навмисно. revealsPrep() ховає блоки
+     (opacity:0) ОДРАЗУ, ще до заставки — інакше застава встигає
+     зникнути раніше, ніж JS взагалі поставить початковий стан,
+     і гість на мить бачить неанімований «стрибок» контенту.
+     revealsGo() — уже сам показ — чекає, поки застава дограє
+     (викликається з intro(), не з boot()): тоді контент вище
+     згортки помітно проявляється в момент, коли сокіл іде
+     геть, а не встигає «доанімуватись» позаду заставки, поки
+     та ще на екрані. */
+  const splitCache = new Map();
+
+  function revealsPrep() {
+    if (!hasGSAP || REDUCED) return;
+    $$('[data-split]').forEach(el => {
+      const split = splitLines(el);
+      if (!split) return;
+      splitCache.set(el, split);
+      gsap.set(split.inners, { yPercent: 110 });
+    });
+    $$('[data-reveal]').forEach(el => gsap.set(el, { opacity: 0, y: 26 }));
+  }
+
   function reveals() {
     if (!hasGSAP || REDUCED) {
       $$('.reveal-img').forEach(b => b.style.setProperty('--p', 1));
@@ -174,9 +200,8 @@
 
     /* 4a. Заголовки */
     $$('[data-split]').forEach(el => {
-      const split = splitLines(el);
+      const split = splitCache.get(el);
       if (!split) return;
-      gsap.set(split.inners, { yPercent: 110 });
       ScrollTrigger.create({
         trigger: el, start: 'top 88%', once: true,
         onEnter() {
@@ -191,7 +216,6 @@
     /* 4b. Блоки тексту */
     $$('[data-reveal]').forEach(el => {
       const delay = parseFloat(el.dataset.reveal) || 0;
-      gsap.set(el, { opacity: 0, y: 26 });
       ScrollTrigger.create({
         trigger: el, start: 'top 92%', once: true,
         onEnter() { gsap.to(el, { opacity: 1, y: 0, duration: 1.1, delay, ease: 'power3.out' }); }
@@ -284,19 +308,36 @@
   /* ---------- СТАРТ ------------------------------------------
      Дві фази. Заставка стартує щойно є DOM — вона не залежить
      ані від контенту, ані від секцій. Решта чекає на дані,
-     інакше тригери стануть на порожні вузли.               */
+     інакше тригери стануть на порожні вузли.
+
+     Сам показ блоків (reveals) навмисно чекає на ОБИДВІ речі —
+     і заставку, і контент — а не тільки на контент, як було
+     раніше. Інакше блоки над згорткою встигали доанімуватись
+     ДО того, як сокіл іде геть, і гість бачив їх уже готовими
+     в момент, коли застава щойно зникла — «стрибок» замість
+     видимої появи. */
+  let preloaderDone = false, contentPrepped = false;
+  function maybeReveal() {
+    if (!preloaderDone || !contentPrepped) return;
+    reveals();
+    if (hasGSAP && window.ScrollTrigger) ScrollTrigger.refresh();
+  }
+
   function intro() {
     heroPrep();
     preloader().then(() => {
       heroIn();
-      if (hasGSAP && window.ScrollTrigger) ScrollTrigger.refresh();
+      preloaderDone = true;
+      maybeReveal();
     });
   }
 
   function boot() {
-    reveals();
+    revealsPrep();
     drift();
     anchors();
+    contentPrepped = true;
+    maybeReveal();
 
     if (hasGSAP && window.ScrollTrigger) {
       /* Cormorant вантажиться асинхронно: після підміни шрифту

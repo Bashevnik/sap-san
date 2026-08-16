@@ -105,7 +105,7 @@
       '<div class="wrap">' +
         '<div class="footer__top">' +
           '<a class="footer__brand" href="index.html" aria-label="SAP SAN">' +
-            D.mark({ sub: S.descriptor }) +
+            D.mark() +
           '</a>' +
           '<div class="footer__cols">' +
             '<div class="footer__col"><b>Розділи</b>' +
