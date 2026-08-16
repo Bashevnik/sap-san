@@ -346,13 +346,34 @@
     if (lockedAxis !== 'x') { lockedAxis = null; return; }
     lockedAxis = null;
 
-    /* < 50 % — назад, > 50 % — доводимо */
-    if (Math.abs(progress) > 0.5) settle(progress > 0 ? 1 : -1, progress > 0 ? 1 : -1);
+    /* Поріг завершення свайпу — навмисно менший за половину:
+       на дотику гість рідко тягне рівно до середини екрана,
+       і з 50% свайп «не долітав», доводилось смикати ще раз —
+       саме це читалось як «застряг після останньої картки». */
+    const THRESHOLD = 0.32;
+    if (Math.abs(progress) > THRESHOLD) settle(progress > 0 ? 1 : -1, progress > 0 ? 1 : -1);
     else if (progress !== 0) settle(0, 0);
   }
   stage.addEventListener('pointerup', endDrag);
   stage.addEventListener('pointercancel', endDrag);
   stage.addEventListener('lostpointercapture', endDrag);
+  /* Палець/курсор може вислизнути за межі сцени швидше, ніж
+     браузер встигне надіслати pointerup/cancel (особливо на
+     мобільному, коли жест іде до самого краю екрана) — без
+     цього перехід лишався недоведеним, і наступний дотик
+     потрапляв у «підвішений» стан. */
+  stage.addEventListener('pointerleave', e => { if (dragging && e.pointerId === pid) endDrag(e); });
+  /* Останній рубіж захисту: якщо гість згорнув вкладку/перемкнув
+     застосунок просто посеред свайпу, жоден із подій вище міг і
+     не надійти — жест «зависає» назавжди, і сцена більше не
+     реагує на дотик. Повернення на вкладку скидає стан насухо. */
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && dragging) {
+      dragging = false; lockedAxis = null; pid = null;
+      stage.classList.remove('is-dragging');
+      progress = 0; render();
+    }
+  });
 
   /* Клік по бічній панелі — перехід у той бік */
   stage.addEventListener('click', e => {
