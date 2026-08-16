@@ -175,7 +175,7 @@
     ).join('');
     dotsBox.addEventListener('click', e => {
       const b = e.target.closest('[data-dot]');
-      if (b) goTo(Number(b.dataset.dot));
+      if (b) { markInteract(); goTo(Number(b.dataset.dot)); }
     });
   }
 
@@ -261,6 +261,32 @@
     step(d > 0 ? 1 : -1);
   }
 
+  /* ---------- 5b. АВТОГОРТАННЯ ----------------------------
+     Раз на 3 с — крок вперед, поки гість не чіпав слайдер. Коло
+     нескінченне в обидва боки (wrapPos), тож просто йдемо далі
+     завжди в одному напрямку. Будь-який реальний жест (дотик,
+     стрілки, крапки) відкладає автогортання на 10 с — не сам
+     autoStep(), інакше він щоразу продовжував би сам себе. */
+  const AUTO_DELAY = 3000, PAUSE_AFTER_INTERACT = 10000;
+  let lastInteract = 0, autoTimer = null;
+  function markInteract() { lastInteract = Date.now(); }
+  function autoStep() {
+    if (dragging || animating) return;
+    if (document.hidden) return;
+    if (Date.now() - lastInteract < PAUSE_AFTER_INTERACT) return;
+    step(1);
+  }
+  function startAuto() {
+    if (autoTimer || REDUCED) return;
+    autoTimer = setInterval(autoStep, AUTO_DELAY);
+  }
+  function stopAuto() {
+    if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stopAuto(); else startAuto();
+  });
+
   /* ---------- 6. DRAG / SWIPE ---------------------------- */
   let dragging = false, lockedAxis = null;
   let startX = 0, startY = 0, startProgress = 0, pid = null;
@@ -272,6 +298,7 @@
 
   stage.addEventListener('pointerdown', e => {
     if (e.button === 1 || e.button === 2) return;
+    markInteract();
     /* Якщо попередній жест не отримав pointerup/cancel (рідкісний збій
        браузера), не даємо йому "заблокувати" наступний дотик —
        завжди починаємо новий трек з чистого стану. */
@@ -340,12 +367,12 @@
   /* ---------- 7. КЛАВІАТУРА ТА КНОПКИ -------------------- */
   const prev = document.getElementById('curtainPrev');
   const next = document.getElementById('curtainNext');
-  if (prev) prev.addEventListener('click', () => step(-1));
-  if (next) next.addEventListener('click', () => step(1));
+  if (prev) prev.addEventListener('click', () => { markInteract(); step(-1); });
+  if (next) next.addEventListener('click', () => { markInteract(); step(1); });
 
   stage.addEventListener('keydown', e => {
-    if (e.key === 'ArrowLeft') { e.preventDefault(); step(-1); }
-    if (e.key === 'ArrowRight') { e.preventDefault(); step(1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); markInteract(); step(-1); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); markInteract(); step(1); }
   });
 
   /* ---------- 8. RESIZE ---------------------------------- */
@@ -360,6 +387,7 @@
     measure();
     render();
     paintInfo();
+    startAuto();
   }
     init();
     if (document.readyState !== 'complete') window.addEventListener('load', init);
