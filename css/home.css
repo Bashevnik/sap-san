@@ -740,6 +740,16 @@
   object-fit: cover;
 }
 
+/* Наступна секція (шезлонги) темна — без цього поол-фото
+   обривалося просто яскравим краєм прямо в темний кадр.
+   Затемнення йде тільки в нижній частині, композицію й панель
+   з тарифами вище не чіпає. */
+.poolband__media::after {
+  content: '';
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: linear-gradient(to bottom, transparent 62%, rgba(9, 15, 18, .58) 100%);
+}
+
 .poolband__inner {
   position: absolute;
   inset: 0;
