@@ -146,18 +146,15 @@
 .ticks::after  { bottom: -9px; right: -9px; border-left: 0; border-top: 0; }
 
 /* ---------- 5. РОЗКРИТТЯ КАДРУ ----------------------------- */
-/* Політ сокола йде зліва направо — тому фото відкривається
-   горизонтальною шторою, а не звичним fade. Це та сама
-   пластика, що й у слайдері будиночків. */
+/* Просте затухання: --p той самий (0 → 1), яким керує JS
+   (js/motion.js), просто тепер він керує лише прозорістю. */
 .js .reveal-img { --p: 0; }
 .js .reveal-img img {
-  -webkit-clip-path: inset(0 calc((1 - var(--p)) * 100%) 0 0);
-  clip-path: inset(0 calc((1 - var(--p)) * 100%) 0 0);
-  transform: scale(calc(1.055 - var(--p) * .055));
-  will-change: clip-path, transform;
+  opacity: var(--p);
+  will-change: opacity;
 }
 @media (prefers-reduced-motion: reduce) {
-  .js .reveal-img img { clip-path: none; transform: none; }
+  .js .reveal-img img { opacity: 1; }
 }
 
 /* Ефект глибини на великих кадрах — зсув усередині рамки */
