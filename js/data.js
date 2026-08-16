@@ -339,6 +339,107 @@
       .finally(() => clearTimeout(timer));
   }
 
+  /* ============================================================
+     ЧИТАННЯ З UPSTASH REDIS (REST API)
+     ------------------------------------------------------------
+     Реальна структура Redis:
+       properties:list  — sorted set, членами якого є ID будинків
+       property:{id}    — hash: id, name, description, maxGuests,
+                          priceWeekday/Weekend/Holiday, checkIn/Out,
+                          photos, amenities, isActive
+
+     Швидше й надійніше за /api/content, коли сам бот повільний
+     чи недоступний, а Redis — ні. Результат іде через ту саму
+     sanitize()/applyContent(), що й API-відповідь: несправна
+     чи тестова ціна відкидається так само, звідки б вона не
+     прийшла. */
+  function fetchFromRedis() {
+    if (!CFG.redisUrl || !CFG.redisToken) return Promise.resolve(null);
+
+    const base = CFG.redisUrl.replace(/\/$/, '');
+    const auth = { Authorization: 'Bearer ' + CFG.redisToken };
+    const timeout = CFG.timeoutMs || 4000;
+
+    function rget(path) {
+      const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+      const timer = setTimeout(() => ctrl && ctrl.abort(), timeout);
+      return fetch(base + path, { headers: auth, signal: ctrl ? ctrl.signal : undefined })
+        .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+        .finally(() => clearTimeout(timer));
+    }
+
+    function flatToObj(arr) {
+      const obj = {};
+      if (!Array.isArray(arr)) return obj;
+      for (let i = 0; i < arr.length; i += 2) obj[arr[i]] = arr[i + 1];
+      return obj;
+    }
+
+    function hashToHouse(h, idx) {
+      let amenities = [];
+      try { amenities = h.amenities ? JSON.parse(h.amenities) : []; }
+      catch (e) { amenities = h.amenities ? h.amenities.split(',').map(s => s.trim()).filter(Boolean) : []; }
+      let gallery = [];
+      try { gallery = h.gallery ? JSON.parse(h.gallery) : []; } catch (e) { gallery = []; }
+
+      const num = String(idx + 1).padStart(2, '0');
+      return {
+        id: 'house-' + h.id,
+        index: num,
+        name: h.name || ('Будиночок ' + num),
+        kicker: h.kicker || '',
+        lead: h.lead || h.description || '',
+        description: h.description || '',
+        guests: parseInt(h.maxGuests, 10) || 4,
+        beds: h.beds || '',
+        area: h.area || '',
+        hero: h.hero || '',
+        gallery,
+        amenities,
+        priceWeekday: parseInt(h.priceWeekday, 10) || null,
+        priceWeekend: parseInt(h.priceWeekend, 10) || null,
+        priceHoliday: parseInt(h.priceHoliday, 10) || null,
+        checkIn: h.checkIn || null,
+        checkOut: h.checkOut || null,
+        isActive: h.isActive === 'true' || h.isActive === true
+      };
+    }
+
+    return rget('/zrange/properties:list/0/-1')
+      .then(res => {
+        const ids = res && Array.isArray(res.result) ? res.result : [];
+        if (!ids.length) return null;
+        return Promise.all(ids.map(id =>
+          rget('/hgetall/property:' + id)
+            .then(r => (r && r.result ? flatToObj(r.result) : null))
+            .catch(() => null)
+        ));
+      })
+      .then(hashes => {
+        if (!hashes) return null;
+        const houses = hashes
+          .filter(h => h && h.id)
+          .filter(h => h.isActive !== 'false')
+          .map(hashToHouse);
+        if (!houses.length) return null;
+
+        const first = houses[0];
+        let housePricing;
+        if (first.priceWeekday) {
+          housePricing = {
+            weekday: { id: 'weekday', label: 'Будні', note: 'Пн — Чт', price: first.priceWeekday, unit: 'за добу' },
+            weekend: { id: 'weekend', label: 'Вихідні', note: 'Пт — Нд', price: first.priceWeekend, unit: 'за добу' },
+            holiday: { id: 'holiday', label: 'Свята', note: 'Святкові дні', price: first.priceHoliday, unit: 'за добу' }
+          };
+        }
+        return housePricing ? { houses, housePricing } : { houses };
+      })
+      .catch(err => {
+        console.warn('[SAP SAN] Redis недоступний, пробуємо API бота:', err.message);
+        return null;
+      });
+  }
+
   /* ------------------------------------------------------------
      ПЕРЕВІРКА ВІДПОВІДІ API
      ------------------------------------------------------------
@@ -405,10 +506,16 @@
       const n = Number(v);
       return Number.isFinite(n) && Math.abs(n) <= max ? n : null;
     },
-    /* Слаг фото має існувати у зібраному маніфесті, інакше
-       на сторінці з'явиться порожній прямокутник */
+    /* Фото — або слаг із зібраного маніфесту (готовий AVIF/WebP,
+       точка фокуса), або пряме посилання на фото, яке адмін
+       щойно завантажив через бота (api.telegram.org/file/…,
+       без обробки — просто <img>). Будь-що інше — порожній
+       рядок, недописаний слаг тощо — відкидаємо: інакше на
+       сторінці з'явиться порожній прямокутник. */
     slug(v) {
-      return typeof v === 'string' && (global.SAPSAN_IMAGES || {})[v] ? v : null;
+      if (typeof v !== 'string' || !v) return null;
+      if ((global.SAPSAN_IMAGES || {})[v]) return v;
+      return /^https?:\/\/\S+$/i.test(v) ? v : null;
     }
   };
 
@@ -593,7 +700,16 @@
     return data;
   }
 
-  const ready = fetchContent().then(applyContent);
+  /* Пріоритет: Redis (швидко, напряму) → API бота → вбудований
+     контент. Redis дає лише houses/housePricing — settings/pool/
+     галерею й далі бере з /content, якщо Redis їх не повернув. */
+  const ready = fetchFromRedis()
+    .then(redisData => {
+      if (!redisData) return fetchContent();
+      return fetchContent().then(apiData =>
+        Object.assign({}, apiData || {}, redisData));
+    })
+    .then(applyContent);
 
   /* ============================================================
      ХЕЛПЕРИ ЗОБРАЖЕНЬ
@@ -615,6 +731,14 @@
 
   const esc = s => String(s == null ? '' : s)
     .replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  /* Фото з адмінки (бот) приходять не слагом із власного каталогу,
+     а прямим посиланням на api.telegram.org — таких нема в
+     new-images/ і build-images.js їх ніколи не бачив. Для них
+     picture()/img() віддають просте <img src="URL">: без AVIF/WebP-
+     сходинки й точки фокуса (адмінка не знає про них), зате фото
+     реально з'являється на сайті, а не тихо зникає. */
+  const isRemoteUrl = s => typeof s === 'string' && /^https?:\/\//i.test(s);
 
   global.SAPSAN = {
     data,
@@ -644,12 +768,14 @@
 
     /** Найбільший доступний файл — для src та лайтбокса */
     img(slug, kind) {
+      if (isRemoteUrl(slug)) return slug;
       const v = variant(slug, kind);
       if (!v) return 'images/' + slug + '.webp';
       return 'images/' + v.base + '-' + v.sizes[v.sizes.length - 1] + '.webp';
     },
 
     srcset(slug, kind, ext) {
+      if (isRemoteUrl(slug)) return '';
       const v = variant(slug, kind);
       if (!v) return '';
       const e = ext || 'webp';
@@ -666,6 +792,19 @@
      */
     picture(slug, opts) {
       const o = opts || {};
+
+      /* Фото з адмінки (пряме посилання на Telegram) — без
+         локального маніфесту нема ні AVIF/WebP-сходинки, ні
+         width/height, ні focus. Проста <picture> з одним <img>,
+         щоб гість узагалі побачив те, що завантажив адмін. */
+      if (isRemoteUrl(slug)) {
+        const alt = esc(o.alt || '');
+        const img = '<img src="' + slug + '" alt="' + alt + '" ' +
+          (o.imgClass ? 'class="' + o.imgClass + '" ' : '') +
+          (o.priority ? 'fetchpriority="high" decoding="async"' : 'loading="lazy" decoding="async"') + '>';
+        return '<picture' + (o.className ? ' class="' + o.className + '"' : '') + '>' + img + '</picture>';
+      }
+
       const m = IMG()[slug];
       const v = variant(slug, o.kind);
       if (!v) return '';
