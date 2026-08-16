@@ -87,9 +87,9 @@ const CATALOG = {
     alt: 'Скляна стіна будиночка A-frame і тераса зі столом над водою'
   },
   'terrace-lakeview': {
-    src: [B3, '10_lake_view_from_house.png'], role: 'wide', tone: 'mid', focus: [0.45, 0.5],
-    crops: { p: [0.42, 0.5], s: [0.45, 0.5] },
-    alt: 'Вид на озеро з тераси будиночка крізь відчинені двері'
+    src: [B3, '10_lake_view_from_house.png'], role: 'wide', tone: 'light', focus: [0.5, 0.6],
+    crops: { p: [0.5, 0.6], s: [0.5, 0.6] },
+    alt: 'Вітальня будиночка A-frame з похилою стелею, телевізором і плетеним диваном'
   },
   'terrace-solar': {
     src: [B4, '02_solar_lake_view.png'], role: 'wide', tone: 'mid', focus: [0.62, 0.5],
