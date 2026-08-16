@@ -605,14 +605,20 @@ h1, h2, h3, h4 { font-weight: inherit; font-size: inherit; }
 /* ---------- 9. ПІДВАЛ -------------------------------------- */
 .footer { position: relative; padding-block: clamp(4rem, 9vh, 7rem) 2rem; overflow: hidden; }
 .footer__top {
-  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.8fr);
   gap: clamp(2.4rem, 6vw, 5rem);
   padding-bottom: clamp(2.5rem, 6vh, 4rem);
 }
-@media (max-width: 860px) { .footer__top { grid-template-columns: 1fr; } }
+@media (max-width: 1080px) { .footer__top { grid-template-columns: 1fr; } }
 
+/* Велика підпис-марка внизу сайту — останнє, що бачить гість,
+   тому знак тут головний елемент, а не дрібна повторна плашка
+   логотипа з шапки. */
 .footer__brand { justify-self: start; }
-.footer__brand .mark__word { font-size: clamp(1.4rem, 2.4vw, 2rem); }
+.footer__brand .mark { gap: .5em; }
+.footer__brand .mark__word { font-size: clamp(2.6rem, 6vw, 4.6rem); letter-spacing: .3em; }
+.footer__brand .mark__bird { opacity: 1; }
+.footer__brand .mark__sub { font-size: clamp(.72rem, 1vw, .86rem); letter-spacing: .34em; margin-top: .2em; }
 
 .footer__cols {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));

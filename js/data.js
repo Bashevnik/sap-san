@@ -81,7 +81,7 @@
       guests: 4,
       beds: '1 двоспальне ліжко + розкладний диван',
       area: '',
-      hero: 'lake-aframe',
+      hero: 'lake-aframe-wide',
       gallery: ['terrace-solar', 'interior-lounge', 'interior-bed', 'interior-bath-2', 'terrace-lakeview'],
       amenities: ['Панорамне скління', 'Тераса з мангалом', 'Кухня з посудом', 'Душ та санвузол',
                   'Кондиціонер', 'Сонячні панелі', 'Wi-Fi', 'Постільна білизна та рушники']
@@ -111,12 +111,12 @@
       guests: 4,
       beds: '1 двоспальне ліжко + розкладний диван',
       area: '',
-      /* Не lake-aframe-wide: той самий кадр уже стоїть у hero
-         головної сторінки, у слайдері він читався б як повтор.
-         terrace-evening до того ж buквально ілюструє «вечірнє
-         світло тримається до останньої хвилини» з підводки. */
-      hero: 'terrace-evening',
-      gallery: ['terrace-lakeview', 'interior-lounge', 'interior-kitchen', 'interior-bed', 'terrace-solar'],
+      /* terrace-evening на цьому місці читався як повтор
+         terrace-glass (обидва — тераса зі столом і кріслами
+         біля води). terrace-solar тут же в галереї, але кадр
+         зовсім інший — солярні панелі й мангал крупним планом. */
+      hero: 'terrace-solar',
+      gallery: ['terrace-lakeview', 'interior-lounge', 'interior-kitchen', 'interior-bed', 'terrace-evening'],
       amenities: ['Панорамне скління', 'Тераса біля води', 'Кухня з посудом', 'Душ та санвузол',
                   'Кондиціонер', 'Мангал', 'Wi-Fi', 'Постільна білизна та рушники']
     }
