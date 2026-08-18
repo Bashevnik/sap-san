@@ -133,22 +133,22 @@
           /* Дочекатися контенту — і тільки тоді відкривати */
           ready.then(() => {
             gsap.timeline({ onComplete() { finish(); resolve(); } })
-              .to($('.preloader__inner', el), { opacity: 0, duration: fast ? .12 : .3, ease: 'power2.in' })
-              .to(el, { clipPath: 'inset(0 0 100% 0)', duration: fast ? .32 : .6, ease: 'power4.inOut' }, fast ? '-=.06' : '-=.15');
+              .to($('.preloader__inner', el), { opacity: 0, duration: fast ? .06 : .3, ease: 'power2.in' })
+              .to(el, { clipPath: 'inset(0 0 100% 0)', duration: fast ? .16 : .6, ease: 'power4.inOut' }, fast ? '-=.03' : '-=.15');
           });
         }
       });
 
       if (fast) {
         /* Швидка версія переходу між сторінками: лише зблиск
-           сокола й смужка прогресу, разом менше секунди — сайт
+           сокола й смужка прогресу, разом чверть секунди — сайт
            уже фактично довантажений, застава тут радше візуальний
            місток між кадрами, ніж повторний бренд-вступ. */
         intro.set(el, { autoAlpha: 1 })
           .fromTo($('.preloader__bird', el),
             { opacity: 0, scaleX: 0.4, transformOrigin: '50% 50%' },
-            { opacity: .95, scaleX: 1, duration: .32, ease: 'power2.out' })
-          .to($('#preloaderFill'), { scaleX: 1, duration: .28, ease: 'power2.out' }, '-=.14');
+            { opacity: .95, scaleX: 1, duration: .16, ease: 'power2.out' })
+          .to($('#preloaderFill'), { scaleX: 1, duration: .14, ease: 'power2.out' }, '-=.07');
         return;
       }
 
