@@ -85,22 +85,14 @@
      бекенд не перетворює заставку на порожнє очікування, а
      швидкий не «зриває» знак на пів-русі.
 
-     Повна версія — тільки для першого візиту за сесію (гість
-     іще не бачив бренд). Далі, поки він ходить сайтом,
-     sessionStorage-прапорець вмикає коротку версію: сама лише
-     заявка про себе — сокіл і смужка, без слова й підпису —
-     бо через кожен клік по меню чекати ту саму церемонію
-     повторно набридає. */
-  const VISITED_KEY = 'sapsan:visited';
-  const hasVisited = () => { try { return sessionStorage.getItem(VISITED_KEY) === '1'; } catch (_) { return false; } };
-  const markVisited = () => { try { sessionStorage.setItem(VISITED_KEY, '1'); } catch (_) {} };
-
+     Та сама версія на кожному завантаженні — на першому вході
+     і на кожному переході між сторінками: сокіл → слово →
+     підпис → смужка, разом ~1.2 с, і плавний вихід (fade +
+     clip-path) у контент сторінки. */
   function preloader() {
     const el = $('#preloader');
     const ready = (window.SAPSAN && window.SAPSAN.ready) || Promise.resolve();
     if (!el) return ready;
-
-    const fast = hasVisited();
 
     /* Не набірний mark() (той — компактний логотип у шапці), а
        окрема композиція: сокіл — головний, великий, по центру;
@@ -111,16 +103,14 @@
       mark.outerHTML =
         '<span class="preloader__mark">' +
           '<span class="preloader__bird">' + window.SAPSAN.bird() + '</span>' +
-          (fast ? '' :
-            '<span class="preloader__word">SAP SAN</span>' +
-            '<span class="preloader__sub">Resort &amp; Retreat</span>') +
+          '<span class="preloader__word">SAP SAN</span>' +
+          '<span class="preloader__sub">Resort &amp; Retreat</span>' +
         '</span>';
     }
 
     const finish = () => {
       el.remove();
       document.body.classList.remove('is-locked');
-      markVisited();
     };
 
     if (REDUCED || !hasGSAP) { finish(); return ready; }
@@ -133,27 +123,12 @@
           /* Дочекатися контенту — і тільки тоді відкривати */
           ready.then(() => {
             gsap.timeline({ onComplete() { finish(); resolve(); } })
-              .to($('.preloader__inner', el), { opacity: 0, duration: fast ? .08 : .3, ease: 'power2.in' })
-              .to(el, { clipPath: 'inset(0 0 100% 0)', duration: fast ? .22 : .6, ease: 'power4.inOut' }, fast ? '-=.04' : '-=.15');
+              .to($('.preloader__inner', el), { opacity: 0, duration: .3, ease: 'power2.in' })
+              .to(el, { clipPath: 'inset(0 0 100% 0)', duration: .6, ease: 'power4.inOut' }, '-=.15');
           });
         }
       });
 
-      if (fast) {
-        /* Швидка версія переходу між сторінками: лише сокіл
-           плавно доростає із середнього розміру до свого —
-           без слова, підпису й смужки прогресу. */
-        intro.set(el, { autoAlpha: 1 })
-          .fromTo($('.preloader__bird', el),
-            { opacity: 0, scaleX: 0.55, transformOrigin: '50% 50%' },
-            { opacity: .95, scaleX: 1, duration: .22, ease: 'sine.out' });
-        return;
-      }
-
-      /* Коротка версія: той самий рух (сокіл → слово → підпис →
-         смужка), стиснутий десь удвічі — застава має встигнути
-         зникнути, поки сторінка ще довантажується, а не тримати
-         гостя на екрані заради самої анімації. */
       intro.set(el, { autoAlpha: 1 })
         .fromTo($('.preloader__bird', el),
           { opacity: 0, scaleX: 0.16, transformOrigin: '50% 50%' },
