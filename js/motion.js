@@ -85,38 +85,14 @@
      бекенд не перетворює заставку на порожнє очікування, а
      швидкий не «зриває» знак на пів-русі.
 
-     Повна церемонія — тільки на першому вході за сесію. На
-     кожному наступному переході між сторінками сокола вже
-     не показуємо: просто прибираємо застава плавним fade,
-     і сторінка під нею м'яко проявляється — без повторного
-     бренд-вступу щоразу. */
-  const VISITED_KEY = 'sapsan:visited';
-  const hasVisited = () => { try { return sessionStorage.getItem(VISITED_KEY) === '1'; } catch (_) { return false; } };
-  const markVisited = () => { try { sessionStorage.setItem(VISITED_KEY, '1'); } catch (_) {} };
-
+     Та сама версія на кожному завантаженні — на першому вході
+     і на кожному переході між сторінками: сокіл → слово →
+     підпис → смужка, разом ~1.2 с, і плавний вихід (fade +
+     clip-path) у контент сторінки. */
   function preloader() {
     const el = $('#preloader');
     const ready = (window.SAPSAN && window.SAPSAN.ready) || Promise.resolve();
     if (!el) return ready;
-
-    const finish = () => {
-      el.remove();
-      document.body.classList.remove('is-locked');
-      markVisited();
-    };
-
-    if (REDUCED || !hasGSAP) { finish(); return ready; }
-
-    /* Повторний перехід: без сокола, без слова — застава просто
-       тане, поки контент під нею вже готовий. */
-    if (hasVisited()) {
-      document.body.classList.add('is-locked');
-      return new Promise(resolve => {
-        ready.then(() => {
-          gsap.to(el, { opacity: 0, duration: .5, ease: 'power2.out', onComplete() { finish(); resolve(); } });
-        });
-      });
-    }
 
     /* Не набірний mark() (той — компактний логотип у шапці), а
        окрема композиція: сокіл — головний, великий, по центру;
@@ -131,6 +107,13 @@
           '<span class="preloader__sub">Resort &amp; Retreat</span>' +
         '</span>';
     }
+
+    const finish = () => {
+      el.remove();
+      document.body.classList.remove('is-locked');
+    };
+
+    if (REDUCED || !hasGSAP) { finish(); return ready; }
 
     document.body.classList.add('is-locked');
 
