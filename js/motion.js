@@ -83,11 +83,24 @@
      чекає на контент з API. Маска піднімається лише коли
      готові обидва — і анімація, і дані. Через це повільний
      бекенд не перетворює заставку на порожнє очікування, а
-     швидкий не «зриває» знак на пів-русі.                 */
+     швидкий не «зриває» знак на пів-русі.
+
+     Повна версія — тільки для першого візиту за сесію (гість
+     іще не бачив бренд). Далі, поки він ходить сайтом,
+     sessionStorage-прапорець вмикає коротку версію: сама лише
+     заявка про себе — сокіл і смужка, без слова й підпису —
+     бо через кожен клік по меню чекати ту саму церемонію
+     повторно набридає. */
+  const VISITED_KEY = 'sapsan:visited';
+  const hasVisited = () => { try { return sessionStorage.getItem(VISITED_KEY) === '1'; } catch (_) { return false; } };
+  const markVisited = () => { try { sessionStorage.setItem(VISITED_KEY, '1'); } catch (_) {} };
+
   function preloader() {
     const el = $('#preloader');
     const ready = (window.SAPSAN && window.SAPSAN.ready) || Promise.resolve();
     if (!el) return ready;
+
+    const fast = hasVisited();
 
     /* Не набірний mark() (той — компактний логотип у шапці), а
        окрема композиція: сокіл — головний, великий, по центру;
@@ -98,14 +111,16 @@
       mark.outerHTML =
         '<span class="preloader__mark">' +
           '<span class="preloader__bird">' + window.SAPSAN.bird() + '</span>' +
-          '<span class="preloader__word">SAP SAN</span>' +
-          '<span class="preloader__sub">Resort &amp; Retreat</span>' +
+          (fast ? '' :
+            '<span class="preloader__word">SAP SAN</span>' +
+            '<span class="preloader__sub">Resort &amp; Retreat</span>') +
         '</span>';
     }
 
     const finish = () => {
       el.remove();
       document.body.classList.remove('is-locked');
+      markVisited();
     };
 
     if (REDUCED || !hasGSAP) { finish(); return ready; }
@@ -118,11 +133,24 @@
           /* Дочекатися контенту — і тільки тоді відкривати */
           ready.then(() => {
             gsap.timeline({ onComplete() { finish(); resolve(); } })
-              .to($('.preloader__inner', el), { opacity: 0, duration: .3, ease: 'power2.in' })
-              .to(el, { clipPath: 'inset(0 0 100% 0)', duration: .6, ease: 'power4.inOut' }, '-=.15');
+              .to($('.preloader__inner', el), { opacity: 0, duration: fast ? .12 : .3, ease: 'power2.in' })
+              .to(el, { clipPath: 'inset(0 0 100% 0)', duration: fast ? .32 : .6, ease: 'power4.inOut' }, fast ? '-=.06' : '-=.15');
           });
         }
       });
+
+      if (fast) {
+        /* Швидка версія переходу між сторінками: лише зблиск
+           сокола й смужка прогресу, разом менше секунди — сайт
+           уже фактично довантажений, застава тут радше візуальний
+           місток між кадрами, ніж повторний бренд-вступ. */
+        intro.set(el, { autoAlpha: 1 })
+          .fromTo($('.preloader__bird', el),
+            { opacity: 0, scaleX: 0.4, transformOrigin: '50% 50%' },
+            { opacity: .95, scaleX: 1, duration: .32, ease: 'power2.out' })
+          .to($('#preloaderFill'), { scaleX: 1, duration: .28, ease: 'power2.out' }, '-=.14');
+        return;
+      }
 
       /* Коротка версія: той самий рух (сокіл → слово → підпис →
          смужка), стиснутий десь удвічі — застава має встигнути
