@@ -85,14 +85,38 @@
      бекенд не перетворює заставку на порожнє очікування, а
      швидкий не «зриває» знак на пів-русі.
 
-     Та сама версія на кожному завантаженні — на першому вході
-     і на кожному переході між сторінками: сокіл → слово →
-     підпис → смужка, разом ~1.2 с, і плавний вихід (fade +
-     clip-path) у контент сторінки. */
+     Повна церемонія — тільки на першому вході за сесію. На
+     кожному наступному переході між сторінками сокола вже
+     не показуємо: просто прибираємо застава плавним fade,
+     і сторінка під нею м'яко проявляється — без повторного
+     бренд-вступу щоразу. */
+  const VISITED_KEY = 'sapsan:visited';
+  const hasVisited = () => { try { return sessionStorage.getItem(VISITED_KEY) === '1'; } catch (_) { return false; } };
+  const markVisited = () => { try { sessionStorage.setItem(VISITED_KEY, '1'); } catch (_) {} };
+
   function preloader() {
     const el = $('#preloader');
     const ready = (window.SAPSAN && window.SAPSAN.ready) || Promise.resolve();
     if (!el) return ready;
+
+    const finish = () => {
+      el.remove();
+      document.body.classList.remove('is-locked');
+      markVisited();
+    };
+
+    if (REDUCED || !hasGSAP) { finish(); return ready; }
+
+    /* Повторний перехід: без сокола, без слова — застава просто
+       тане, поки контент під нею вже готовий. */
+    if (hasVisited()) {
+      document.body.classList.add('is-locked');
+      return new Promise(resolve => {
+        ready.then(() => {
+          gsap.to(el, { opacity: 0, duration: .5, ease: 'power2.out', onComplete() { finish(); resolve(); } });
+        });
+      });
+    }
 
     /* Не набірний mark() (той — компактний логотип у шапці), а
        окрема композиція: сокіл — головний, великий, по центру;
@@ -108,13 +132,6 @@
         '</span>';
     }
 
-    const finish = () => {
-      el.remove();
-      document.body.classList.remove('is-locked');
-    };
-
-    if (REDUCED || !hasGSAP) { finish(); return ready; }
-
     document.body.classList.add('is-locked');
 
     return new Promise(resolve => {
@@ -123,8 +140,8 @@
           /* Дочекатися контенту — і тільки тоді відкривати */
           ready.then(() => {
             gsap.timeline({ onComplete() { finish(); resolve(); } })
-              .to($('.preloader__inner', el), { opacity: 0, duration: .3, ease: 'power2.in' })
-              .to(el, { clipPath: 'inset(0 0 100% 0)', duration: .6, ease: 'power4.inOut' }, '-=.15');
+              .to($('.preloader__inner', el), { opacity: 0, duration: .45, ease: 'power2.in' })
+              .to(el, { clipPath: 'inset(0 0 100% 0)', duration: 1.05, ease: 'power4.inOut' }, '-=.15');
           });
         }
       });
@@ -132,10 +149,10 @@
       intro.set(el, { autoAlpha: 1 })
         .fromTo($('.preloader__bird', el),
           { opacity: 0, scaleX: 0.16, transformOrigin: '50% 50%' },
-          { opacity: .95, scaleX: 1, duration: .85, ease: 'power3.out' })
-        .from($('.preloader__word', el), { y: 14, opacity: 0, duration: .55, ease: 'power2.out' }, '-=.35')
-        .from($('.preloader__sub', el), { opacity: 0, duration: .5, ease: 'none' }, '-=.3')
-        .to($('#preloaderFill'), { scaleX: 1, duration: .7, ease: 'power2.inOut' }, '-=.7');
+          { opacity: .95, scaleX: 1, duration: 1.5, ease: 'power3.out' })
+        .from($('.preloader__word', el), { y: 14, opacity: 0, duration: .9, ease: 'power2.out' }, '-=.55')
+        .from($('.preloader__sub', el), { opacity: 0, duration: .8, ease: 'none' }, '-=.5')
+        .to($('#preloaderFill'), { scaleX: 1, duration: 1.1, ease: 'power2.inOut' }, '-=1.1');
     });
   }
 
