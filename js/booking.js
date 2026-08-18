@@ -179,9 +179,8 @@
     return L.join('\n');
   }
 
-  function wire(formId, successId, kind) {
+  function wire(formId, kind) {
     const form = $(formId);
-    const success = $(successId);
     if (!form) return;
 
     form.addEventListener('submit', e => {
@@ -191,7 +190,7 @@
       const spam = spamCheck(form);
       if (spam === 'trap' || spam === 'tooFast') {
         /* Ботам показуємо той самий екран — без підказок, що саме спрацювало */
-        showSuccess(form, success);
+        location.href = 'booking-success.html';
         return;
       }
       if (spam === 'throttled') {
@@ -211,7 +210,7 @@
       submitBooking(payload)
         .then(() => {
           try { localStorage.setItem('sapsan:lastBooking', String(Date.now())); } catch (_) {}
-          showSuccess(form, success);
+          location.href = 'booking-success.html';
         })
         .catch(() => {
           if (btn) { btn.disabled = false; btn.innerHTML = label; }
@@ -220,15 +219,7 @@
     });
   }
 
-  function showSuccess(form, success) {
-    form.querySelectorAll('.field, .form__foot').forEach(n => { n.style.display = 'none'; });
-    if (success) {
-      success.classList.add('is-on');
-      success.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  }
-
-  wire('#formHouse', '#successHouse', 'house');
-  wire('#formSunbeds', '#successSunbeds', 'sunbeds');
+  wire('#formHouse', 'house');
+  wire('#formSunbeds', 'sunbeds');
   }
 })();
