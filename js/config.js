@@ -14,13 +14,11 @@
 window.SAPSAN_CONFIG = {
   apiBase: 'https://sapsanbot.vercel.app/api',
 
-  /* ── Upstash Redis REST ──────────────────────────────────────
-     Пряме читання будиночків із Redis-бази бота — швидше й
-     надійніше за /api/content, коли сам API повільний чи
-     недоступний. Пріоритет: Redis → bot API → вбудований контент. */
-  redisUrl:   'https://sacred-mudfish-39294.upstash.io',
-  redisToken: 'AZl-AAIgcDFjYTAwNThhMzM1NTA0ZTFiODlhZTVhZWM4Njg2NmYwNg',
-  redisKey:   'content',
+  /* Пряме читання Upstash Redis з браузера звідси прибрано —
+     REST-токен у клієнтському JS видно будь-кому через
+     "переглянути код сторінки". Той самий контент бот віддає
+     через {apiBase}/content: токен лишається на сервері бота
+     (process.env), а не в браузері гостя. Деталі — SECURITY.md. */
 
   /* Скільки секунд тримати відповідь /content у пам'яті вкладки */
   cacheTtl: 60,

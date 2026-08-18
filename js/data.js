@@ -339,106 +339,12 @@
       .finally(() => clearTimeout(timer));
   }
 
-  /* ============================================================
-     ЧИТАННЯ З UPSTASH REDIS (REST API)
-     ------------------------------------------------------------
-     Реальна структура Redis:
-       properties:list  — sorted set, членами якого є ID будинків
-       property:{id}    — hash: id, name, description, maxGuests,
-                          priceWeekday/Weekend/Holiday, checkIn/Out,
-                          photos, amenities, isActive
-
-     Швидше й надійніше за /api/content, коли сам бот повільний
-     чи недоступний, а Redis — ні. Результат іде через ту саму
-     sanitize()/applyContent(), що й API-відповідь: несправна
-     чи тестова ціна відкидається так само, звідки б вона не
-     прийшла. */
-  function fetchFromRedis() {
-    if (!CFG.redisUrl || !CFG.redisToken) return Promise.resolve(null);
-
-    const base = CFG.redisUrl.replace(/\/$/, '');
-    const auth = { Authorization: 'Bearer ' + CFG.redisToken };
-    const timeout = CFG.timeoutMs || 4000;
-
-    function rget(path) {
-      const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
-      const timer = setTimeout(() => ctrl && ctrl.abort(), timeout);
-      return fetch(base + path, { headers: auth, signal: ctrl ? ctrl.signal : undefined })
-        .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-        .finally(() => clearTimeout(timer));
-    }
-
-    function flatToObj(arr) {
-      const obj = {};
-      if (!Array.isArray(arr)) return obj;
-      for (let i = 0; i < arr.length; i += 2) obj[arr[i]] = arr[i + 1];
-      return obj;
-    }
-
-    function hashToHouse(h, idx) {
-      let amenities = [];
-      try { amenities = h.amenities ? JSON.parse(h.amenities) : []; }
-      catch (e) { amenities = h.amenities ? h.amenities.split(',').map(s => s.trim()).filter(Boolean) : []; }
-      let gallery = [];
-      try { gallery = h.gallery ? JSON.parse(h.gallery) : []; } catch (e) { gallery = []; }
-
-      const num = String(idx + 1).padStart(2, '0');
-      return {
-        id: 'house-' + h.id,
-        index: num,
-        name: h.name || ('Будиночок ' + num),
-        kicker: h.kicker || '',
-        lead: h.lead || h.description || '',
-        description: h.description || '',
-        guests: parseInt(h.maxGuests, 10) || 4,
-        beds: h.beds || '',
-        area: h.area || '',
-        hero: h.hero || '',
-        gallery,
-        amenities,
-        priceWeekday: parseInt(h.priceWeekday, 10) || null,
-        priceWeekend: parseInt(h.priceWeekend, 10) || null,
-        priceHoliday: parseInt(h.priceHoliday, 10) || null,
-        checkIn: h.checkIn || null,
-        checkOut: h.checkOut || null,
-        isActive: h.isActive === 'true' || h.isActive === true
-      };
-    }
-
-    return rget('/zrange/properties:list/0/-1')
-      .then(res => {
-        const ids = res && Array.isArray(res.result) ? res.result : [];
-        if (!ids.length) return null;
-        return Promise.all(ids.map(id =>
-          rget('/hgetall/property:' + id)
-            .then(r => (r && r.result ? flatToObj(r.result) : null))
-            .catch(() => null)
-        ));
-      })
-      .then(hashes => {
-        if (!hashes) return null;
-        const houses = hashes
-          .filter(h => h && h.id)
-          .filter(h => h.isActive !== 'false')
-          .map(hashToHouse);
-        if (!houses.length) return null;
-
-        const first = houses[0];
-        let housePricing;
-        if (first.priceWeekday) {
-          housePricing = {
-            weekday: { id: 'weekday', label: 'Будні', note: 'Пн — Чт', price: first.priceWeekday, unit: 'за добу' },
-            weekend: { id: 'weekend', label: 'Вихідні', note: 'Пт — Нд', price: first.priceWeekend, unit: 'за добу' },
-            holiday: { id: 'holiday', label: 'Свята', note: 'Святкові дні', price: first.priceHoliday, unit: 'за добу' }
-          };
-        }
-        return housePricing ? { houses, housePricing } : { houses };
-      })
-      .catch(err => {
-        console.warn('[SAP SAN] Redis недоступний, пробуємо API бота:', err.message);
-        return null;
-      });
-  }
+  /* Пряме читання з Upstash Redis REST API звідси прибрано:
+     REST-токен Upstash не можна тримати в клієнтському JS —
+     будь-який відвідувач бачить його у вихідному коді сторінки.
+     Той самий контент бот віддає через fetchContent() нижче
+     (GET {apiBase}/content) — токен там лишається на сервері
+     бота, а не в браузері гостя. */
 
   /* ------------------------------------------------------------
      ПЕРЕВІРКА ВІДПОВІДІ API
@@ -700,16 +606,8 @@
     return data;
   }
 
-  /* Пріоритет: Redis (швидко, напряму) → API бота → вбудований
-     контент. Redis дає лише houses/housePricing — settings/pool/
-     галерею й далі бере з /content, якщо Redis їх не повернув. */
-  const ready = fetchFromRedis()
-    .then(redisData => {
-      if (!redisData) return fetchContent();
-      return fetchContent().then(apiData =>
-        Object.assign({}, apiData || {}, redisData));
-    })
-    .then(applyContent);
+  /* Пріоритет: API бота → вбудований контент. */
+  const ready = fetchContent().then(applyContent);
 
   /* ============================================================
      ХЕЛПЕРИ ЗОБРАЖЕНЬ
