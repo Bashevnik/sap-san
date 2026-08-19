@@ -395,10 +395,10 @@ h1, h2, h3, h4 { font-weight: inherit; font-size: inherit; }
 
 /* ---------- 7. ШАПКА --------------------------------------- */
 .header {
-  /* Вище за заставку (z-index:200): меню не має зникати й
-     з'являтися заново — воно лишається на місці протягом усього
-     вступу, застава грає під ним лише навколо фото й тексту. */
-  position: fixed; inset: 0 0 auto; z-index: 210;
+  /* Нижче за заставку (z-index:200): застава — суцільна
+     відеозаставка на весь екран, накриває геть усе, включно
+     з шапкою, поки не дограє. */
+  position: fixed; inset: 0 0 auto; z-index: 190;
   display: flex; align-items: center; justify-content: space-between;
   gap: 1.5rem;
   padding: clamp(.9rem, 1.9vw, 1.5rem) var(--gut);

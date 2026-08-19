@@ -85,11 +85,11 @@
      бекенд не перетворює заставку на порожнє очікування, а
      швидкий не «зриває» знак на пів-русі.
 
-     Тільки на першому вході на сайт за сесію — не на кожному
-     переході між сторінками, і не на reload. sessionStorage-
-     прапорець: показали один раз — далі на будь-якій сторінці
-     застава миттєво прибирається без анімації, сайт відкритий
-     одразу. */
+     Одна й та сама застава на кожному завантаженні — і на
+     першому вході, і на кожному переході між сторінками — але
+     на переходах (sessionStorage: уже бачили цю сесію) уся
+     хронометрія стиснута в 1.5 раза: той самий рух, помітно
+     швидше, а не інша анімація. */
   const INTRO_SEEN_KEY = 'sapsan:introSeen';
   const introSeen = () => { try { return sessionStorage.getItem(INTRO_SEEN_KEY) === '1'; } catch (_) { return false; } };
   const markIntroSeen = () => { try { sessionStorage.setItem(INTRO_SEEN_KEY, '1'); } catch (_) {} };
@@ -99,11 +99,8 @@
     const ready = (window.SAPSAN && window.SAPSAN.ready) || Promise.resolve();
     if (!el) return ready;
 
-    if (introSeen()) {
-      el.remove();
-      document.body.classList.remove('is-locked');
-      return ready;
-    }
+    const fast = introSeen();
+    const t = ms => fast ? +(ms / 1.5).toFixed(3) : ms;
 
     /* Не набірний mark() (той — компактний логотип у шапці), а
        окрема композиція: сокіл — головний, великий, по центру;
@@ -135,8 +132,8 @@
           /* Дочекатися контенту — і тільки тоді відкривати */
           ready.then(() => {
             gsap.timeline({ onComplete() { finish(); resolve(); } })
-              .to($('.preloader__inner', el), { opacity: 0, duration: .45, ease: 'power2.in' })
-              .to(el, { clipPath: 'inset(0 0 100% 0)', duration: 1.05, ease: 'power4.inOut' }, '-=.15');
+              .to($('.preloader__inner', el), { opacity: 0, duration: t(.45), ease: 'power2.in' })
+              .to(el, { clipPath: 'inset(0 0 100% 0)', duration: t(1.05), ease: 'power4.inOut' }, '-=' + t(.15));
           });
         }
       });
@@ -144,10 +141,10 @@
       intro.set(el, { autoAlpha: 1 })
         .fromTo($('.preloader__bird', el),
           { opacity: 0, scaleX: 0.16, transformOrigin: '50% 50%' },
-          { opacity: .95, scaleX: 1, duration: 1.5, ease: 'power3.out' })
-        .from($('.preloader__word', el), { y: 14, opacity: 0, duration: .9, ease: 'power2.out' }, '-=.55')
-        .from($('.preloader__sub', el), { opacity: 0, duration: .8, ease: 'none' }, '-=.5')
-        .to($('#preloaderFill'), { scaleX: 1, duration: 1.1, ease: 'power2.inOut' }, '-=1.1');
+          { opacity: .95, scaleX: 1, duration: t(1.5), ease: 'power3.out' })
+        .from($('.preloader__word', el), { y: 14, opacity: 0, duration: t(.9), ease: 'power2.out' }, '-=' + t(.55))
+        .from($('.preloader__sub', el), { opacity: 0, duration: t(.8), ease: 'none' }, '-=' + t(.5))
+        .to($('#preloaderFill'), { scaleX: 1, duration: t(1.1), ease: 'power2.inOut' }, '-=' + t(1.1));
     });
   }
 
