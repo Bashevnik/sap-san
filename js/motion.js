@@ -85,14 +85,25 @@
      бекенд не перетворює заставку на порожнє очікування, а
      швидкий не «зриває» знак на пів-русі.
 
-     Та сама версія на кожному завантаженні — на першому вході
-     і на кожному переході між сторінками: сокіл → слово →
-     підпис → смужка, разом ~1.2 с, і плавний вихід (fade +
-     clip-path) у контент сторінки. */
+     Тільки на першому вході на сайт за сесію — не на кожному
+     переході між сторінками, і не на reload. sessionStorage-
+     прапорець: показали один раз — далі на будь-якій сторінці
+     застава миттєво прибирається без анімації, сайт відкритий
+     одразу. */
+  const INTRO_SEEN_KEY = 'sapsan:introSeen';
+  const introSeen = () => { try { return sessionStorage.getItem(INTRO_SEEN_KEY) === '1'; } catch (_) { return false; } };
+  const markIntroSeen = () => { try { sessionStorage.setItem(INTRO_SEEN_KEY, '1'); } catch (_) {} };
+
   function preloader() {
     const el = $('#preloader');
     const ready = (window.SAPSAN && window.SAPSAN.ready) || Promise.resolve();
     if (!el) return ready;
+
+    if (introSeen()) {
+      el.remove();
+      document.body.classList.remove('is-locked');
+      return ready;
+    }
 
     /* Не набірний mark() (той — компактний логотип у шапці), а
        окрема композиція: сокіл — головний, великий, по центру;
@@ -111,6 +122,7 @@
     const finish = () => {
       el.remove();
       document.body.classList.remove('is-locked');
+      markIntroSeen();
     };
 
     if (REDUCED || !hasGSAP) { finish(); return ready; }
