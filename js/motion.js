@@ -197,12 +197,18 @@
   function revealsPrep() {
     if (!hasGSAP || REDUCED) return;
     $$('[data-split]').forEach(el => {
+      if (el.dataset.animPrepped) return;
+      el.dataset.animPrepped = '1';
       const split = splitLines(el);
       if (!split) return;
       splitCache.set(el, split);
       gsap.set(split.inners, { yPercent: 110 });
     });
-    $$('[data-reveal]').forEach(el => gsap.set(el, { opacity: 0, y: 26 }));
+    $$('[data-reveal]').forEach(el => {
+      if (el.dataset.animPrepped) return;
+      el.dataset.animPrepped = '1';
+      gsap.set(el, { opacity: 0, y: 26 });
+    });
   }
 
   function reveals() {
@@ -211,10 +217,20 @@
       return;
     }
 
+    /* Кожен блок отримує тригер лише раз: викликаємо reveals()
+       двічі за життя сторінки (одразу після застави — для
+       статичного контенту з розмітки, і ще раз після відповіді
+       бота — для того, що домалював pages.js), і без прапорця
+       другий виклик або дублював би тригери на вже показаному,
+       або (гірше) revealsPrep() тим часом ховала б назад те,
+       що гість уже побачив. */
+
     /* 4a. Заголовки */
     $$('[data-split]').forEach(el => {
+      if (el.dataset.animTriggered) return;
       const split = splitCache.get(el);
       if (!split) return;
+      el.dataset.animTriggered = '1';
       ScrollTrigger.create({
         trigger: el, start: 'top 88%', once: true,
         onEnter() {
@@ -228,6 +244,8 @@
 
     /* 4b. Блоки тексту */
     $$('[data-reveal]').forEach(el => {
+      if (el.dataset.animTriggered) return;
+      el.dataset.animTriggered = '1';
       const delay = parseFloat(el.dataset.reveal) || 0;
       ScrollTrigger.create({
         trigger: el, start: 'top 92%', once: true,
@@ -240,6 +258,8 @@
            у CSS лишається одне джерело геометрії, і кадр
            одночасно з'їжджає з масштабу без другого твіна. */
     $$('.reveal-img').forEach(box => {
+      if (box.dataset.animTriggered) return;
+      box.dataset.animTriggered = '1';
       const o = { p: 0 };
       ScrollTrigger.create({
         trigger: box, start: 'top 88%', once: true,
@@ -255,6 +275,8 @@
     /* 4d. Глибина: кадр повільно йде всередині своєї рамки.
            Рамка не рухається, тому сусідні блоки не «пливуть». */
     $$('.par').forEach(el => {
+      if (el.dataset.animTriggered) return;
+      el.dataset.animTriggered = '1';
       const amt = parseFloat(el.dataset.par) || 8;
       gsap.fromTo(el, { yPercent: -amt }, {
         yPercent: amt, ease: 'none',
@@ -267,6 +289,8 @@
 
     /* 4e. Горизонтальний дрейф — для широких стрічок */
     $$('[data-drift]').forEach(el => {
+      if (el.dataset.animTriggered) return;
+      el.dataset.animTriggered = '1';
       const amt = parseFloat(el.dataset.drift) || 6;
       gsap.fromTo(el, { xPercent: -amt }, {
         xPercent: amt, ease: 'none',
@@ -319,38 +343,38 @@
   }
 
   /* ---------- СТАРТ ------------------------------------------
-     Дві фази. Заставка стартує щойно є DOM — вона не залежить
-     ані від контенту, ані від секцій. Решта чекає на дані,
-     інакше тригери стануть на порожні вузли.
+     Показ статичного контенту розмітки (шапка героя, заголовки
+     секцій — усе, що вже є в HTML і не чекає на бота) НЕ прив'язаний
+     до відповіді {apiBase}/content: інакше текст і фото з'являлися
+     врізнобій — картинка (звичайне завантаження файлу) вже видно,
+     а текст ще стоїть невидимим, бо reveals() чекає на бота (до
+     4с, а на таймауті — увесь час). revealsPrep()+reveals() тепер
+     ідуть одразу після застави (preloader() резолвиться миттєво
+     на повторних переходах, і лише після сокола — на першому
+     вході, щоб не «стрибати» з-за заставки).
 
-     Сам показ блоків (reveals) навмисно чекає на ОБИДВІ речі —
-     і заставку, і контент — а не тільки на контент, як було
-     раніше. Інакше блоки над згорткою встигали доанімуватись
-     ДО того, як сокіл іде геть, і гість бачив їх уже готовими
-     в момент, коли застава щойно зникла — «стрибок» замість
-     видимої появи. */
-  let preloaderDone = false, contentPrepped = false;
-  function maybeReveal() {
-    if (!preloaderDone || !contentPrepped) return;
-    reveals();
-    if (hasGSAP && window.ScrollTrigger) ScrollTrigger.refresh();
-  }
-
+     boot() (все ще після онлайн-контенту) прогонить revealsPrep()/
+     reveals() ЩЕ РАЗ — для того, що pages.js домалював уже після
+     відповіді бота (списки будиночків, тарифи тощо). Прапорець
+     data-anim-prepped/-triggered на кожному елементі гарантує, що
+     статичний контент від першого проходу не займається вдруге —
+     інакше другий revealsPrep() ховав би назад те, що гість уже
+     побачив. */
   function intro() {
     heroPrep();
+    revealsPrep();
     preloader().then(() => {
       heroIn();
-      preloaderDone = true;
-      maybeReveal();
+      reveals();
+      if (hasGSAP && window.ScrollTrigger) ScrollTrigger.refresh();
     });
   }
 
   function boot() {
-    revealsPrep();
     drift();
     anchors();
-    contentPrepped = true;
-    maybeReveal();
+    revealsPrep();
+    reveals();
 
     if (hasGSAP && window.ScrollTrigger) {
       /* Cormorant вантажиться асинхронно: після підміни шрифту
