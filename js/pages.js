@@ -19,6 +19,18 @@
   const ARROW = I('arrow', 'btn__ico');
 
   /**
+   * Хелпер: рендерить або локальний слаг через D.picture(),
+   * або повний URL (фото з бота) через простий <img>.
+   */
+  function renderPhoto(src, sizes, alt) {
+    if (!src) return '';
+    if (/^https?:\/\//i.test(src)) {
+      return '<img src="' + src + '" alt="' + (alt || 'SAP SAN') + '" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;object-position:center">';
+    }
+    return D.picture(src, { sizes: sizes || '(max-width: 780px) 94vw, 74vw', alt: alt });
+  }
+
+  /**
    * sizes для стрічки .shots (css/pages.css): 6-колонкова сітка,
    * де перший кадр займає 4/6, другий і третій — по 2/6, четвертий
    * і п'ятий — по 3/6 (тобто рівно половину). Раніше всі кадри,
@@ -46,7 +58,7 @@
       <article class="hrow" data-reveal>
         <a class="hrow__media" href="house.html?id=${h.id}" aria-label="${h.name} — детальніше">
           <div class="figure reveal-img" style="position:relative">
-            ${D.picture(h.hero, { sizes: '(max-width: 980px) 94vw, 56vw', alt: h.name + ' — SAP SAN' })}
+            ${renderPhoto(h.hero, '(max-width: 980px) 94vw, 56vw', h.name + ' — SAP SAN')}
             <span class="hrow__n">${h.index}</span>
           </div>
         </a>
@@ -81,10 +93,7 @@
 
     const hero = $('#houseHero');
     if (hero) {
-      hero.innerHTML = D.picture(h.hero, {
-        sizes: '100vw', priority: true, alt: h.name + ' — SAP SAN',
-        art: { media: '(max-width: 760px)', kind: 'p' }
-      });
+      hero.innerHTML = renderPhoto(h.hero, '100vw', h.name + ' — SAP SAN');
     }
     const t = $('#houseTitle');  if (t) t.textContent = h.name;
     const k = $('#houseKicker'); if (k) k.textContent = h.kicker;
@@ -94,6 +103,11 @@
     document.title = h.name + ' — SAP SAN Resort & Retreat';
     const md = $('meta[name="description"]');
     if (md) md.setAttribute('content', h.lead);
+
+    // Ціни: per-house або fallback на housePricing
+    const wd = h.priceWeekday || pr.weekday.price;
+    const we = h.priceWeekend || pr.weekend.price;
+    const ho = h.priceHoliday || pr.holiday.price;
 
     root.innerHTML = `
       <div class="hdetail__main">
@@ -125,32 +139,40 @@
       <aside class="aside" data-reveal>
         <p class="label">Вартість за добу</p>
         <dl>
-          <div class="aside__rate"><dt><b>${pr.weekday.label}</b><span>${pr.weekday.note}</span></dt><dd>${P(pr.weekday.price)}</dd></div>
-          <div class="aside__rate"><dt><b>${pr.weekend.label}</b><span>${pr.weekend.note}</span></dt><dd>${P(pr.weekend.price)}</dd></div>
-          <div class="aside__rate"><dt><b>${pr.special.label}</b><span>${pr.special.note} · ${pr.special.save}</span></dt><dd>${P(pr.special.price)}</dd></div>
-          <div class="aside__rate"><dt><b>${pr.holiday.label}</b><span>${pr.holiday.note}</span></dt><dd>${P(pr.holiday.price)}</dd></div>
+          <div class="aside__rate"><dt><b>${pr.weekday.label}</b><span>${pr.weekday.note}</span></dt><dd>${P(wd)}</dd></div>
+          <div class="aside__rate"><dt><b>${pr.weekend.label}</b><span>${pr.weekend.note}</span></dt><dd>${P(we)}</dd></div>
+          <div class="aside__rate"><dt><b>${pr.special.label}</b><span>${pr.special.note} · ${pr.special.save}</span></dt><dd>${P(we ? we - 1000 : null)}</dd></div>
+          <div class="aside__rate"><dt><b>${pr.holiday.label}</b><span>${pr.holiday.note}</span></dt><dd>${P(ho)}</dd></div>
         </dl>
         <a class="btn" href="booking.html?type=house&house=${h.id}">Залишити заявку ${ARROW}</a>
         <a class="btn btn--ghost" href="tel:${S.phoneHref}">${S.phone}</a>
         <p class="aside__note">Заявка на сайті не означає автоматичне підтвердження бронювання. Для фіксації дати потрібна передоплата.</p>
       </aside>`;
 
+    // Галерея будиночка — всі фото, підтримка URL з бота
     const gal = $('#houseShots');
     if (gal) {
-      gal.classList.add('shots--wide');
-      gal.innerHTML = (h.gallery || []).slice(0, 2).map(g => `
-        <figure>
-          <div class="figure figure--free reveal-img">
-            ${D.picture(g, { sizes: '(max-width: 780px) 94vw, 74vw' })}
-          </div>
-        </figure>`).join('');
+      const gallery = h.gallery || [];
+      if (gallery.length) {
+        gal.classList.add('shots--wide');
+        gal.innerHTML = gallery.map(g => `
+          <figure>
+            <div class="figure figure--free reveal-img">
+              ${renderPhoto(g, '(max-width: 780px) 94vw, 74vw', h.name)}
+            </div>
+          </figure>`).join('');
+      } else {
+        gal.style.display = 'none';
+        const section = gal.closest('section');
+        if (section) section.style.display = 'none';
+      }
     }
 
     const other = $('#otherHouses');
     if (other) {
       other.innerHTML = D.data.houses.filter(x => x.id !== h.id).map(x => `
         <a href="house.html?id=${x.id}" data-reveal>
-          <div class="figure reveal-img">${D.picture(x.hero, { sizes: '(max-width: 780px) 94vw, 44vw', alt: x.name })}</div>
+          <div class="figure reveal-img">${renderPhoto(x.hero, '(max-width: 780px) 94vw, 44vw', x.name)}</div>
           <b>${x.name}</b>
         </a>`).join('');
     }
@@ -167,7 +189,6 @@
         amenityFeature: (h.amenities || []).map(a => ({
           '@type': 'LocationFeatureSpecification', name: a, value: true
         })),
-        image: location.origin + '/' + D.img(h.hero)
       });
     }
   }
@@ -185,8 +206,6 @@
             <dd>${P(t.price)}</dd>
           </div>`).join('') +
         (p.children || []).map(c => {
-          /* Не дублюємо підпис, якщо він збігається з ціною
-             («безкоштовно» і в ціні, і в примітці). */
           const priceText = c.price === null ? 'уточнюйте' : P(c.price);
           const note = (c.note && c.note.toLowerCase() !== priceText.toLowerCase()) ? c.note : '';
           return `
@@ -210,10 +229,10 @@
 
     const pg = $('#poolShots');
     if (pg) {
-      pg.innerHTML = (p.gallery || []).slice(0, 5).map((g, i) => `
+      pg.innerHTML = (p.gallery || []).map((g, i) => `
         <figure>
           <div class="figure reveal-img">
-            ${D.picture(g, { sizes: shotsSizes(i) })}
+            ${renderPhoto(g, shotsSizes(i), 'Басейн SAP SAN')}
           </div>
         </figure>`).join('');
     }
@@ -231,15 +250,13 @@
         `<button type="button" data-tag="${t}" aria-pressed="${i === 0}">${t}</button>`).join('');
     }
 
-    /* Кожен третій кадр — вертикальний: у колонковій масонрі
-       це прибирає ефект однакових плиток. */
     grid.innerHTML = items.map((g, i) => `
       <figure class="ggrid__item" data-tag="${g.tag}">
         <div class="figure reveal-img">
-          ${D.picture(g.image, { sizes: '(max-width: 520px) 92vw, (max-width: 900px) 46vw, 31vw', kind: i % 3 === 1 ? 'p' : null })}
+          ${renderPhoto(g.image, '(max-width: 520px) 92vw, (max-width: 900px) 46vw, 31vw')}
         </div>
         <figcaption class="ggrid__cap">${g.tag}</figcaption>
-        <button type="button" data-i="${i}" aria-label="Відкрити на весь екран: ${D.alt(g.image)}"></button>
+        <button type="button" data-i="${i}" aria-label="Відкрити на весь екран"></button>
       </figure>`).join('');
 
     if (filter) {
@@ -266,11 +283,16 @@
       const g = items[i];
       if (!g) return;
       cur = i;
-      lbImg.src = D.img(g.image);
-      lbImg.srcset = D.srcset(g.image);
-      lbImg.sizes = '94vw';
-      lbImg.alt = D.alt(g.image);
-      lbCap.textContent = D.alt(g.image);
+      const src = /^https?:\/\//i.test(g.image) ? g.image : D.img(g.image);
+      lbImg.src = src;
+      if (!/^https?:\/\//i.test(g.image)) {
+        lbImg.srcset = D.srcset(g.image);
+        lbImg.sizes = '94vw';
+      } else {
+        lbImg.srcset = '';
+      }
+      lbImg.alt = 'SAP SAN';
+      lbCap.textContent = g.tag || 'SAP SAN';
     };
     const open = i => {
       lastFocus = document.activeElement;
@@ -408,7 +430,7 @@
         </dl>
       </div>
       <div class="bside__card">
-        <p class="label">Зв’язок</p>
+        <p class="label">Зв'язок</p>
         <b>${S.phone}</b>
         <p class="small mute">${S.hours}</p>
         <div class="btns">
