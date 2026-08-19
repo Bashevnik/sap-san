@@ -29,24 +29,6 @@
   const $  = (s, c) => (c || document).querySelector(s);
   const $$ = (s, c) => Array.from((c || document).querySelectorAll(s));
 
-  /* bfcache: коли браузер відновлює сторінку «назад/вперед» із
-     кеша, весь наш JS НЕ перезапускається — DOM лишається таким,
-     яким його заморозили перед вивантаженням. Якщо гість пішов
-     з цієї сторінки саме через клік по посиланню (coverAndGo()
-     встиг замкнути body.is-locked і показати заставу перед самим
-     переходом), відновлена з bfcache версія назавжди залишиться
-     «накритою» — жодна інша подія це не поправить. pageshow з
-     persisted:true — єдиний надійний сигнал для миттєвого скиду. */
-  window.addEventListener('pageshow', e => {
-    if (!e.persisted) return;
-    const el = document.getElementById('preloader');
-    if (el) {
-      if (typeof window.gsap !== 'undefined') gsap.set(el, { autoAlpha: 0 });
-      else el.style.setProperty('display', 'none');
-    }
-    document.body.classList.remove('is-locked');
-  });
-
   if (hasGSAP && window.ScrollTrigger) gsap.registerPlugin(ScrollTrigger);
   /* На iOS/Android адресний рядок ховається й з'являється під
      час скролу, змінюючи window.innerHeight на льоту — pin
@@ -103,81 +85,39 @@
      бекенд не перетворює заставку на порожнє очікування, а
      швидкий не «зриває» знак на пів-русі.
 
-     Три сценарії, за типом навігації (Navigation Timing API +
-     document.referrer), а не за sessionStorage-прапорцем —
-     так коректно розрізняються вкладки, назад/вперед і reload:
-       intro — повна церемонія: прямий/зовнішній заход, reload;
-       mini  — лише швидкий reveal: перехід по посиланню всередині
-               сайту (сам «cover» вже відіграв на попередній
-               сторінці, у coverAndGo(), перед навігацією);
-       skip  — назад/вперед браузера: без анімації, застава
-               прибирається миттєво.
-     Заставку не видаляємо з DOM після відтворення, а ховаємо —
-     той самий вузол іще знадобиться як «накривало» для cover-
-     фази, коли гість клікне наступне посилання на цій сторінці. */
-  function navKind() {
-    if (REDUCED) return 'skip';
-    const entries = window.performance && performance.getEntriesByType && performance.getEntriesByType('navigation');
-    const type = (entries && entries[0] && entries[0].type) ||
-      (performance.navigation && ['navigate', 'reload', 'back_forward'][performance.navigation.type]) ||
-      'navigate';
-    if (type === 'back_forward') return 'skip';
-    if (type === 'reload') return 'intro';
-    let sameOrigin = false;
-    if (document.referrer) {
-      try { sameOrigin = new URL(document.referrer).origin === location.origin; } catch (_) {}
-    }
-    return sameOrigin ? 'mini' : 'intro';
-  }
-
-  function buildMark(withWord) {
-    const mark = $('#preloaderMark');
-    if (!mark || !window.SAPSAN || !window.SAPSAN.bird) return;
-    mark.outerHTML =
-      '<span class="preloader__mark">' +
-        '<span class="preloader__bird">' + window.SAPSAN.bird() + '</span>' +
-        (withWord ?
-          '<span class="preloader__word">SAP SAN</span>' +
-          '<span class="preloader__sub">Resort &amp; Retreat</span>' : '') +
-      '</span>';
-  }
-
+     Та сама версія на кожному завантаженні — на першому вході
+     і на кожному переході між сторінками: сокіл → слово →
+     підпис → смужка, разом ~1.2 с, і плавний вихід (fade +
+     clip-path) у контент сторінки. */
   function preloader() {
     const el = $('#preloader');
     const ready = (window.SAPSAN && window.SAPSAN.ready) || Promise.resolve();
     if (!el) return ready;
 
-    const kind = navKind();
-
-    if (kind === 'skip' || !hasGSAP) {
-      el.remove();
-      document.body.classList.remove('is-locked');
-      return ready;
+    /* Не набірний mark() (той — компактний логотип у шапці), а
+       окрема композиція: сокіл — головний, великий, по центру;
+       слово й дескриптор — окремим блоком нижче, з повітрям
+       між ними. */
+    const mark = $('#preloaderMark');
+    if (mark && window.SAPSAN && window.SAPSAN.bird) {
+      mark.outerHTML =
+        '<span class="preloader__mark">' +
+          '<span class="preloader__bird">' + window.SAPSAN.bird() + '</span>' +
+          '<span class="preloader__word">SAP SAN</span>' +
+          '<span class="preloader__sub">Resort &amp; Retreat</span>' +
+        '</span>';
     }
 
-    buildMark(kind === 'intro');
-
-    /* Ховаємо (не видаляємо) — clipPath теж скидаємо тут-таки,
-       одним .set(), щоб не було проміжного кадру з видимим,
-       але вже розкритим накривалом. */
     const finish = () => {
-      gsap.set(el, { autoAlpha: 0, clipPath: 'inset(0 0 0 0)' });
+      el.remove();
       document.body.classList.remove('is-locked');
     };
+
+    if (REDUCED || !hasGSAP) { finish(); return ready; }
 
     document.body.classList.add('is-locked');
 
     return new Promise(resolve => {
-      if (kind === 'mini') {
-        /* «Cover» вже відбувся на попередній сторінці (клік по
-           посиланню) — тут лише «reveal»: застава швидко тане. */
-        ready.then(() => {
-          gsap.timeline({ onComplete() { finish(); resolve(); } })
-            .to(el, { autoAlpha: 0, duration: .5, ease: 'power2.out' });
-        });
-        return;
-      }
-
       const intro = gsap.timeline({
         onComplete() {
           /* Дочекатися контенту — і тільки тоді відкривати */
@@ -196,55 +136,6 @@
         .from($('.preloader__word', el), { y: 14, opacity: 0, duration: .9, ease: 'power2.out' }, '-=.55')
         .from($('.preloader__sub', el), { opacity: 0, duration: .8, ease: 'none' }, '-=.5')
         .to($('#preloaderFill'), { scaleX: 1, duration: 1.1, ease: 'power2.inOut' }, '-=1.1');
-    });
-  }
-
-  /* ---------- 2b. ПЕРЕХІД МІЖ СТОРІНКАМИ («cover») ----------
-     Клік по внутрішньому посиланню: перехоплюємо, швидко
-     показуємо заставу (сокіл долітає до повного розміру), і за
-     ~420мс — уже після того, як cover встиг відіграти, —
-     переходимо насправді. На новій сторінці navKind() побачить
-     свій-таки referrer і зіграє лише «mini»-reveal.
-
-     Не чіпаємо: якорі (#...), зовнішні посилання, посилання з
-     target, модифіковані кліки (Ctrl/Cmd/Shift/середня кнопка) —
-     все це має лишитись звичайною навігацією браузера. */
-  function coverAndGo(url) {
-    const el = $('#preloader');
-    if (!el || !hasGSAP) { location.href = url; return; }
-
-    buildMark(false);
-    const bird = $('.preloader__bird', el);
-    gsap.killTweensOf(el);
-    if (bird) gsap.killTweensOf(bird);
-
-    document.body.classList.add('is-locked');
-    gsap.set(el, { clipPath: 'inset(0 0 0 0)' });
-    gsap.fromTo(el, { autoAlpha: 0 }, { autoAlpha: 1, duration: .18, ease: 'power2.out' });
-    if (bird) {
-      gsap.fromTo(bird,
-        { opacity: 0, scaleX: 0.55, transformOrigin: '50% 50%' },
-        { opacity: .95, scaleX: 1, duration: .34, ease: 'sine.out' });
-    }
-
-    setTimeout(() => { location.href = url; }, 420);
-  }
-
-  function linkTransitions() {
-    if (REDUCED || !hasGSAP) return;
-    document.addEventListener('click', e => {
-      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-      const a = e.target.closest('a[href]');
-      if (!a || a.hasAttribute('download')) return;
-      if (a.target && a.target !== '_self') return;
-      const href = a.getAttribute('href');
-      if (!href || href.charAt(0) === '#') return;
-      let url;
-      try { url = new URL(href, location.href); } catch (_) { return; }
-      if (url.origin !== location.origin) return;
-      if (url.href.split('#')[0] === location.href.split('#')[0]) return;
-      e.preventDefault();
-      coverAndGo(url.href);
     });
   }
 
@@ -435,7 +326,6 @@
 
   function intro() {
     heroPrep();
-    linkTransitions();
     preloader().then(() => {
       heroIn();
       preloaderDone = true;
