@@ -34,8 +34,13 @@
      час скролу, змінюючи window.innerHeight на льоту — pin
      (застосований у секції «Один день») тоді сіпається й іноді
      «відпускає» скрол посеред кроку. normalizeScroll — офіційний
-     фікс GSAP саме під цю мобільну поведінку. */
-  if (hasGSAP && window.ScrollTrigger && !REDUCED) ScrollTrigger.normalizeScroll(true);
+     фікс GSAP саме під цю мобільну поведінку.
+
+     allowNestedScroll: без цього normalizeScroll перехоплює
+     колесо миші глобально й прокручує лише document — вкладені
+     елементи з власним overflow (повноекранне меню, .menu) на
+     десктопі переставали прокручуватись колесом узагалі. */
+  if (hasGSAP && window.ScrollTrigger && !REDUCED) ScrollTrigger.normalizeScroll({ allowNestedScroll: true });
 
   /* ---------- 1. ЗАГОЛОВОК ПО РЯДКАХ ------------------------
      Ділимо на слова, вимірюємо, збираємо назад у маски рядків.
