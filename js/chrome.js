@@ -256,7 +256,15 @@
     });
   }
 
-  if (window.SAPSAN && window.SAPSAN.onReady) window.SAPSAN.onReady(mount);
-  else if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount);
+  /* Шапка/меню/підвал — статична структура: D.data вже містить
+     вбудований контент синхронно, задовго до відповіді бота.
+     Раніше mount() чекав window.SAPSAN.onReady() — а це і DOM,
+     і відповідь {apiBase}/content (до 4с, а на повільному чи
+     недоступному боті — увесь таймаут). Через це меню зникало
+     на кожному переході між сторінками, а не тільки на першому
+     завантаженні. Тепер чекаємо лише DOM: меню з'являється
+     миттєво на вбудованих даних, а якщо бот пізніше віддасть
+     інші налаштування — на структуру шапки це майже не впливає. */
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount);
   else mount();
 })();
