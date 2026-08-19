@@ -100,7 +100,7 @@
     if (!el) return ready;
 
     const fast = introSeen();
-    const t = ms => fast ? +(ms / 1.5).toFixed(3) : ms;
+    const t = ms => fast ? +(ms / 1.875).toFixed(3) : ms;
 
     /* Не набірний mark() (той — компактний логотип у шапці), а
        окрема композиція: сокіл — головний, великий, по центру;
