@@ -119,12 +119,38 @@
   .shots figure:nth-child(n+2) { grid-column: span 1; }
 }
 
-/* Кадри будиночка на house.html: повне, необрізане фото
-   (натуральні пропорції) замість цегляної масонрі-сітки. */
-.shots--wide { display: grid; grid-template-columns: 1fr; gap: clamp(1.6rem, 4vw, 2.8rem); }
-.shots--wide figure { grid-column: auto; }
-.shots--wide .figure { aspect-ratio: auto; background: none; }
-.shots--wide .figure img { border-radius: 2px; }
+/* Галерея будиночка на house.html: слайдер замість стрічки —
+   одне фото на весь блок, стрілки, лічильник. touch-action:
+   pan-y лишає вертикальний скрол сторінки пальцем природним,
+   а горизонтальний свайп забирає під себе JS. */
+.hgallery { position: relative; aspect-ratio: 16 / 9; overflow: hidden; background: var(--slate); touch-action: pan-y; border-radius: 2px; }
+.hgallery__track { display: flex; width: 100%; height: 100%; transition: transform .6s var(--e-io); will-change: transform; }
+.hgallery__track.is-dragging { transition: none; }
+.hgallery__slide { flex: 0 0 100%; width: 100%; height: 100%; }
+.hgallery__slide .figure { width: 100%; height: 100%; }
+.hgallery img { -webkit-user-drag: none; user-select: none; }
+
+.hgallery__nav {
+  position: absolute; top: 50%; z-index: 2; transform: translateY(-50%);
+  width: 3rem; height: 3rem; display: grid; place-items: center;
+  color: var(--paper); border: 1px solid rgba(242,240,233,.28); border-radius: 100px;
+  background: rgba(13,20,24,.3);
+  transition: background-color .35s, color .35s;
+}
+.hgallery__nav:hover { background: var(--paper); color: var(--ink); }
+.hgallery__nav--prev { left: clamp(.6rem, 2vw, 1.4rem); }
+.hgallery__nav--next { right: clamp(.6rem, 2vw, 1.4rem); }
+.hgallery__nav .ico { width: 1.2rem; }
+
+.hgallery__count {
+  position: absolute; z-index: 2; right: clamp(.8rem, 2vw, 1.4rem); bottom: clamp(.8rem, 2vw, 1.4rem);
+  padding: .35rem .8rem; font-size: var(--t-small); letter-spacing: .04em;
+  color: var(--paper); background: rgba(13,20,24,.45); border-radius: 100px;
+}
+@media (max-width: 640px) {
+  .hgallery { aspect-ratio: 4 / 3; }
+  .hgallery__nav { width: 2.5rem; height: 2.5rem; }
+}
 
 .others { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: clamp(1rem, 3vw, 2rem); }
 .others a { display: grid; gap: .8rem; }

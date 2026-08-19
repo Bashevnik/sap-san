@@ -30,6 +30,68 @@
     return D.picture(src, { sizes: sizes || '(max-width: 780px) 94vw, 74vw', alt: alt });
   }
 
+  /* ---------- ГАЛЕРЕЯ БУДИНОЧКА (СЛАЙДЕР) --------------------
+     Трек на translateX + Pointer Events для свайпу — той самий
+     жест працює і мишею, і пальцем, без окремих touch/mouse
+     обробників. Один інстанс на сторінку (house.html), тому
+     просто замикання на переданому корені, без реєстру. */
+  function navHTML() {
+    return '' +
+      '<button class="hgallery__nav hgallery__nav--prev" type="button" aria-label="Попереднє фото">' +
+        '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12H3M9.6 5.4 3 12l6.6 6.6"/></svg>' +
+      '</button>' +
+      '<button class="hgallery__nav hgallery__nav--next" type="button" aria-label="Наступне фото">' +
+        '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18M14.4 5.4 21 12l-6.6 6.6"/></svg>' +
+      '</button>';
+  }
+
+  function initHouseGallery(root) {
+    const track = $('.hgallery__track', root);
+    const slides = $$('.hgallery__slide', root);
+    const prev = $('.hgallery__nav--prev', root);
+    const next = $('.hgallery__nav--next', root);
+    const cur = $('[data-hg-cur]', root);
+    const n = slides.length;
+    let i = 0;
+
+    function go(idx) {
+      i = (idx + n) % n;
+      track.style.transform = 'translateX(-' + (i * 100) + '%)';
+      if (cur) cur.textContent = String(i + 1);
+    }
+
+    prev.addEventListener('click', () => go(i - 1));
+    next.addEventListener('click', () => go(i + 1));
+
+    /* Поріг свайпу — третина ширини блока: коротший ривок
+       повертає на місце, довший доводить до сусіднього кадру. */
+    let startX = 0, dx = 0, dragging = false, width = root.clientWidth;
+
+    root.addEventListener('pointerdown', e => {
+      dragging = true; dx = 0; width = root.clientWidth; startX = e.clientX;
+      track.classList.add('is-dragging');
+    });
+    root.addEventListener('pointermove', e => {
+      if (!dragging) return;
+      dx = e.clientX - startX;
+      track.style.transform = 'translateX(calc(-' + (i * 100) + '% + ' + dx + 'px))';
+    });
+    const release = () => {
+      if (!dragging) return;
+      dragging = false;
+      track.classList.remove('is-dragging');
+      const threshold = width * .18;
+      if (dx <= -threshold) go(i + 1);
+      else if (dx >= threshold) go(i - 1);
+      else go(i);
+    };
+    root.addEventListener('pointerup', release);
+    root.addEventListener('pointercancel', release);
+    root.addEventListener('pointerleave', release);
+
+    window.addEventListener('resize', () => go(i));
+  }
+
   /**
    * sizes для стрічки .shots (css/pages.css): 6-колонкова сітка,
    * де перший кадр займає 4/6, другий і третій — по 2/6, четвертий
@@ -149,18 +211,21 @@
         <p class="aside__note">Заявка на сайті не означає автоматичне підтвердження бронювання. Для фіксації дати потрібна передоплата.</p>
       </aside>`;
 
-    // Галерея будиночка — всі фото, підтримка URL з бота
+    // Галерея будиночка — слайдер, підтримка URL з бота
     const gal = $('#houseShots');
     if (gal) {
       const gallery = h.gallery || [];
       if (gallery.length) {
-        gal.classList.add('shots--wide');
-        gal.innerHTML = gallery.map(g => `
-          <figure>
-            <div class="figure figure--free reveal-img">
-              ${renderPhoto(g, '(max-width: 780px) 94vw, 74vw', h.name)}
-            </div>
-          </figure>`).join('');
+        const multi = gallery.length > 1;
+        gal.className = 'hgallery';
+        gal.setAttribute('data-reveal', '');
+        gal.innerHTML =
+          '<div class="hgallery__track">' +
+            gallery.map(g => '<div class="hgallery__slide"><div class="figure">' +
+              renderPhoto(g, '(max-width: 780px) 94vw, 74vw', h.name) + '</div></div>').join('') +
+          '</div>' +
+          (multi ? navHTML() + '<div class="hgallery__count"><span data-hg-cur>1</span>/<span>' + gallery.length + '</span></div>' : '');
+        if (multi) initHouseGallery(gal);
       } else {
         gal.style.display = 'none';
         const section = gal.closest('section');
