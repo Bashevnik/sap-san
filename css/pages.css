@@ -258,6 +258,18 @@
 .cmap { position: relative; height: clamp(380px, 60vh, 680px); background: var(--paper-2); }
 .cmap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; filter: grayscale(.3) contrast(1.04); }
 
+/* Ембед центрований рівно по координатах SAP SAN, тому мітка
+   завжди опиняється в центрі карти — гаряча зона над нею веде
+   на справжній запис у Google Maps (без цього клік по мітці
+   давав лише «координати», без назви й телефону). */
+.cmap__pin { position: absolute; z-index: 2; left: 50%; top: 50%; width: 68px; height: 92px; transform: translate(-50%, -100%); }
+.cmap__pin::after {
+  content: ''; position: absolute; left: 50%; bottom: 6px; width: 34px; height: 34px;
+  transform: translateX(-50%); border-radius: 50%;
+  background: transparent; transition: background-color .3s;
+}
+.cmap__pin:hover::after, .cmap__pin:focus-visible::after { background: rgba(13,20,24,.12); }
+
 .hours { display: grid; gap: .5rem; }
 .hours div { display: flex; justify-content: space-between; gap: 1rem; padding-block: .6rem; border-top: 1px solid var(--line-2); font-size: var(--t-small); }
 .hours div:first-child { border-top: 0; }

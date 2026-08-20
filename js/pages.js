@@ -433,8 +433,21 @@
     const frame = $('#cmap');
     if (frame && !frame.dataset.done) {
       frame.dataset.done = '1';
-      frame.innerHTML = '<iframe title="Розташування SAP SAN на карті" loading="lazy" ' +
-        'referrerpolicy="no-referrer-when-downgrade" allowfullscreen src="' + S.mapEmbed + '"></iframe>';
+      /* Точка на вбудованій карті — координати без прив'язки до
+         справжнього запису SAP SAN у Google Maps: клік по ній
+         відкриває лише «координати», без назви й телефону, а
+         не картку закладу. Замість намагатися це виправити
+         всередині чужого iframe (недоступно — інший домен),
+         кладемо поверх маленьку прозору «гарячу зону» рівно там,
+         де завжди опиняється мітка (карта центрована по запиту),
+         яка веде на справжній, перевірений запис — mapLink. Там
+         усі дані вже без обрізання, бо це повна сторінка Google
+         Maps, а не тісне вікно попапа. */
+      frame.innerHTML =
+        '<iframe title="Розташування SAP SAN на карті" loading="lazy" ' +
+          'referrerpolicy="no-referrer-when-downgrade" allowfullscreen src="' + S.mapEmbed + '"></iframe>' +
+        '<a class="cmap__pin" href="' + S.mapLink + '" target="_blank" rel="noopener" ' +
+          'aria-label="Відкрити SAP SAN у Google Maps"></a>';
     }
     const route = $('#routeBtn');
     if (route) route.href = S.routeLink;
