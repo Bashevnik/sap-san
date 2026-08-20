@@ -30,11 +30,11 @@
     return D.picture(src, { sizes: sizes || '(max-width: 780px) 94vw, 74vw', alt: alt });
   }
 
-  /* ---------- ГАЛЕРЕЯ БУДИНОЧКА (СЛАЙДЕР) --------------------
+  /* ---------- ГАЛЕРЕЯ-СЛАЙДЕР (будиночок, басейн) ------------
      Трек на translateX + Pointer Events для свайпу — той самий
      жест працює і мишею, і пальцем, без окремих touch/mouse
-     обробників. Один інстанс на сторінку (house.html), тому
-     просто замикання на переданому корені, без реєстру. */
+     обробників. На кожній сторінці не більше одного інстанту,
+     тому просто замикання на переданому корені, без реєстру. */
   function navHTML() {
     return '' +
       '<button class="hgallery__nav hgallery__nav--prev" type="button" aria-label="Попереднє фото">' +
@@ -45,7 +45,7 @@
       '</button>';
   }
 
-  function initHouseGallery(root) {
+  function initGallerySlider(root) {
     const track = $('.hgallery__track', root);
     const slides = $$('.hgallery__slide', root);
     const prev = $('.hgallery__nav--prev', root);
@@ -90,24 +90,6 @@
     root.addEventListener('pointerleave', release);
 
     window.addEventListener('resize', () => go(i));
-  }
-
-  /**
-   * sizes для стрічки .shots (css/pages.css): 6-колонкова сітка,
-   * де перший кадр займає 4/6, другий і третій — по 2/6, четвертий
-   * і п'ятий — по 3/6 (тобто рівно половину). Раніше всі кадри,
-   * крім першого, отримували однакове «30vw», хоча четвертий і
-   * п'ятий фактично рендеряться вдвічі ширшими (виміряно в
-   * браузері: 798px замість очікуваних 526px при 1920px viewport,
-   * тобто delivered ratio 0.72 — помітно м'якше зображення).
-   * sizes береться з максимуму по брейкпоінтах: mobile-версія
-   * ширша за розрахунок, тому невелике завищення нешкідливе,
-   * а заниження — ні.
-   */
-  function shotsSizes(i) {
-    if (i === 0) return '(max-width: 760px) 94vw, 62vw';
-    if (i === 1 || i === 2) return '(max-width: 760px) 46vw, 30vw';
-    return '(max-width: 760px) 46vw, 48vw';
   }
 
   /* ---------- СПИСОК БУДИНОЧКІВ ---------------------------- */
@@ -225,7 +207,7 @@
               renderPhoto(g, '(max-width: 780px) 94vw, 74vw', h.name) + '</div></div>').join('') +
           '</div>' +
           (multi ? navHTML() + '<div class="hgallery__count"><span data-hg-cur>1</span>/<span>' + gallery.length + '</span></div>' : '');
-        if (multi) initHouseGallery(gal);
+        if (multi) initGallerySlider(gal);
       } else {
         gal.style.display = 'none';
         const section = gal.closest('section');
@@ -294,12 +276,23 @@
 
     const pg = $('#poolShots');
     if (pg) {
-      pg.innerHTML = (p.gallery || []).map((g, i) => `
-        <figure>
-          <div class="figure reveal-img">
-            ${renderPhoto(g, shotsSizes(i), 'Басейн SAP SAN')}
-          </div>
-        </figure>`).join('');
+      const shots = p.gallery || [];
+      if (shots.length) {
+        const multi = shots.length > 1;
+        pg.className = 'hgallery';
+        pg.setAttribute('data-reveal', '');
+        pg.innerHTML =
+          '<div class="hgallery__track">' +
+            shots.map(g => '<div class="hgallery__slide"><div class="figure">' +
+              renderPhoto(g, '(max-width: 780px) 94vw, 74vw', 'Басейн SAP SAN') + '</div></div>').join('') +
+          '</div>' +
+          (multi ? navHTML() + '<div class="hgallery__count"><span data-hg-cur>1</span>/<span>' + shots.length + '</span></div>' : '');
+        if (multi) initGallerySlider(pg);
+      } else {
+        pg.style.display = 'none';
+        const section = pg.closest('section');
+        if (section) section.style.display = 'none';
+      }
     }
   }
 
